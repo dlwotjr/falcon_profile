@@ -1,0 +1,8 @@
+venv/
+tex/*.aux
+tex/*.log
+tex/*.out
+tex/*.toc
+*.dot
+gmon.out
+__pycache__/

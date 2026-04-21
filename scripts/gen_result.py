@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
-"""Read gprof flat profiles and write result.md comparing O0 vs O3."""
+"""Read gprof flat profiles and write result.md comparing O0 vs O3.
+Run from the falcon_profiling repo root:
+    python3 scripts/gen_result.py
+"""
 
 import re
 import os
+
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RESULTS_DIR = os.path.join(REPO_ROOT, "results")
 
 OPERATIONS = [
     "falcon512_keygen",
@@ -82,8 +88,8 @@ lines.append("|-----------|-------:|-------:|--------:|")
 
 speedups = {}
 for op in OPERATIONS:
-    p0 = f"analysis_{op}_O0.txt"
-    p3 = f"analysis_{op}_O3.txt"
+    p0 = os.path.join(RESULTS_DIR, f"analysis_{op}_O0.txt")
+    p3 = os.path.join(RESULTS_DIR, f"analysis_{op}_O3.txt")
     if not os.path.exists(p0) or not os.path.exists(p3):
         continue
     t0, _ = parse_flat_profile(p0)
@@ -96,8 +102,8 @@ lines.append("")
 
 # Per-operation detail
 for op in OPERATIONS:
-    p0 = f"analysis_{op}_O0.txt"
-    p3 = f"analysis_{op}_O3.txt"
+    p0 = os.path.join(RESULTS_DIR, f"analysis_{op}_O0.txt")
+    p3 = os.path.join(RESULTS_DIR, f"analysis_{op}_O3.txt")
     if not os.path.exists(p0) or not os.path.exists(p3):
         continue
 
@@ -151,7 +157,8 @@ lines.append("- **verify** is 70–300× faster than keygen. Uses integer NTT on
 lines.append("- **Falcon-1024 costs ~2–3× more** than Falcon-512 in all operations (N doubles, FFT is O(N log N)).")
 lines.append("- **O3 speedup** is largest for keygen/sign (arithmetic-heavy), smaller for verify (already fast, memory-bound).")
 
-with open("result.md", "w") as f:
+out_path = os.path.join(RESULTS_DIR, "result.md")
+with open(out_path, "w") as f:
     f.write("\n".join(lines) + "\n")
 
-print("result.md written.")
+print(f"Written: {out_path}")

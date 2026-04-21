@@ -16,7 +16,8 @@ OPERATIONS = [
     ("falcon1024", "verify"),
 ]
 
-ANALYSIS_DIR = os.path.dirname(os.path.abspath(__file__))
+REPO_ROOT    = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ANALYSIS_DIR = os.path.join(REPO_ROOT, "results")
 
 # ---------------------------------------------------------------------------
 # Function categorisation
@@ -451,7 +452,7 @@ def build_tex(data):
 if __name__ == "__main__":
     data = load_all()
     tex = build_tex(data)
-    out = os.path.join(ANALYSIS_DIR, "tex", "falcon_profiling.tex")
+    out = os.path.join(REPO_ROOT, "tex", "falcon_profiling.tex")
     os.makedirs(os.path.dirname(out), exist_ok=True)
     with open(out, "w") as f:
         f.write(tex)
