@@ -1,0 +1,29 @@
+# compiled binaries
+falcon_test
+falcon_profile
+falcon_profile_O0
+falcon_profile_O3
+
+# profiling artifacts
+gmon.out
+gmon_*.out
+analysis.txt
+analysis_*.txt
+output.dot
+output_*.dot
+output_*.png
+result.md
+run_profile.sh
+gen_result.py
+main_profile.c
+
+# claude settings
+.claude/
+
+# python
+venv/
+__pycache__/
+
+# object files and libraries
+*.o
+*.a
