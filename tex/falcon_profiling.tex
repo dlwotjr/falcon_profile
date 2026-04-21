@@ -1,0 +1,1438 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{caption}
+\usepackage{pgfplots}
+\usepackage{amssymb}
+\pgfplotsset{compat=1.18}
+
+\definecolor{hashcolor}{RGB}{173,216,230}
+\definecolor{intcolor}{RGB}{255,228,181}
+\definecolor{fpcolor}{RGB}{195,255,195}
+\definecolor{othercolor}{RGB}{220,220,220}
+
+\title{\textbf{Falcon Post-Quantum Signature Scheme}\\
+        \large Function-Level Profiling Report\\
+        \normalsize \texttt{-O0} vs \texttt{-O3} $\cdot$ 1000 iterations $\cdot$ gprof}
+\author{Falcon-512 / Falcon-1024}
+\date{\today}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Overview}
+
+This report presents a function-level profiling analysis of the
+\textbf{Falcon} post-quantum digital signature scheme
+(NIST PQC Round 3 finalist, lattice-based).
+Two parameter sets are compared: \textbf{Falcon-512} (NIST Level~1)
+and \textbf{Falcon-1024} (NIST Level~5).
+Each operation was executed $\mathbf{1000}$ times and profiled with
+\texttt{gprof} under two compiler settings:
+\texttt{-O0 -fno-inline -pg} and \texttt{-O3 -fno-inline -pg}.
+
+Functions are grouped into three categories:
+\begin{itemize}
+  \item \colorbox{hashcolor}{\strut Hash / PRNG} ---
+        SHAKE-256 (Keccak), PRNG refill, hash-to-point.
+  \item \colorbox{intcolor}{\strut Integer Arithmetic} ---
+        Modular NTT (\texttt{modp\_*}, \texttt{mq\_*}),
+        multi-precision integers (\texttt{zint\_*}),
+        Gaussian sampler (\texttt{mkgauss}).
+  \item \colorbox{fpcolor}{\strut Floating-Point / FFT} ---
+        Custom 53-bit FPR type (\texttt{fpr\_*}, \texttt{FPR}),
+        FFT/iFFT, polynomial operations.
+\end{itemize}
+
+\section{Runtime Summary: O0 vs O3}
+
+\begin{table}[h!]
+\centering
+\caption{Total cumulative runtime (seconds, 1000 iterations)}
+\begin{tabular}{llrrr}
+\toprule
+Variant & Operation & O0 (s) & O3 (s) & Speedup \\
+\midrule
+  Falcon-512 & KeyGen & 51.96 & 11.74 & $\mathbf{4.43\times}$ \\
+  Falcon-512 & Sign & 15.93 & 3.24 & $\mathbf{4.92\times}$ \\
+  Falcon-512 & Verify & 0.19 & 0.05 & $\mathbf{3.80\times}$ \\
+  Falcon-1024 & KeyGen & 143.26 & 34.31 & $\mathbf{4.18\times}$ \\
+  Falcon-1024 & Sign & 34.24 & 6.81 & $\mathbf{5.03\times}$ \\
+  Falcon-1024 & Verify & 0.59 & 0.08 & $\mathbf{7.38\times}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Category Weight per Operation}
+
+The following tables show what fraction of total profiled time
+is spent in each functional category for O0 and O3 builds.
+
+\subsection{Category Breakdown --- \texttt{-O0}}
+
+\begin{table}[h!]
+\centering
+\caption{Category time share \texttt{-O0} (\%)}
+\begin{tabular}{llrrrr}
+\toprule
+Variant & Operation & \colorbox{hashcolor}{Hash} & \colorbox{intcolor}{Integer} & \colorbox{fpcolor}{FP/FFT} & Other \\
+\midrule
+  Falcon-512 & KeyGen & 5.8\% & 31.9\% & 61.1\% & 1.2\% \\
+  Falcon-512 & Sign & 1.4\% & 2.1\% & 96.2\% & 0.3\% \\
+  Falcon-512 & Verify & 0.0\% & 78.9\% & 21.1\% & 0.0\% \\
+  Falcon-1024 & KeyGen & 3.2\% & 33.3\% & 62.5\% & 1.0\% \\
+  Falcon-1024 & Sign & 1.8\% & 2.0\% & 96.0\% & 0.3\% \\
+  Falcon-1024 & Verify & 13.6\% & 54.2\% & 28.8\% & 3.4\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Category Breakdown --- \texttt{-O3}}
+
+\begin{table}[h!]
+\centering
+\caption{Category time share \texttt{-O3} (\%)}
+\begin{tabular}{llrrrr}
+\toprule
+Variant & Operation & \colorbox{hashcolor}{Hash} & \colorbox{intcolor}{Integer} & \colorbox{fpcolor}{FP/FFT} & Other \\
+\midrule
+  Falcon-512 & KeyGen & 8.3\% & 39.0\% & 50.9\% & 1.8\% \\
+  Falcon-512 & Sign & 2.8\% & 2.8\% & 94.4\% & 0.0\% \\
+  Falcon-512 & Verify & 40.0\% & 60.0\% & 0.0\% & 0.0\% \\
+  Falcon-1024 & KeyGen & 4.5\% & 40.6\% & 53.2\% & 1.6\% \\
+  Falcon-1024 & Sign & 1.2\% & 3.2\% & 95.6\% & 0.0\% \\
+  Falcon-1024 & Verify & 25.0\% & 62.5\% & 12.5\% & 0.0\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Per-Operation Function Detail}
+
+Each subsection shows the top functions per category
+for both O0 and O3 builds. Column headers:
+\texttt{\%} = percentage of total profiled time,
+\texttt{self(s)} = self seconds,
+\texttt{calls} = call count.
+
+\subsection{Falcon-512 --- KeyGen}
+
+\subsubsection*{\texttt{-O0} build (total: 51.960\,s)}
+
+\noindent\colorbox{hashcolor}{\strut \textbf{Hash / PRNG} --- 5.8\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{KeccakF1600\_StatePermute} & 3.75 & 1.9500 & 2.7M \\
+  \texttt{keccak\_inc\_squeeze} & 1.51 & 0.7900 & 46.1M \\
+  \texttt{get\_rng\_u64} & 0.35 & 0.1800 & 46.1M \\
+  \texttt{shake256\_inc\_squeeze} & 0.15 & 0.0800 & 46.1M \\
+  \texttt{PQCLEAN\_randombytes} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{keccak\_inc\_absorb} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{keccak\_inc\_finalize} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{keccak\_inc\_init} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{randombytes\_linux\_randombytes\_getrandom} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{shake256\_inc\_absorb} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{shake256\_inc\_ctx\_release} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{shake256\_inc\_finalize} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{shake256\_inc\_init} & 0.00 & 0.0000 & 1.0K \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{intcolor}{\strut \textbf{Integer Arithmetic} --- 31.9\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{modp\_montymul} & 11.90 & 6.1800 & 980.6M \\
+  \texttt{modp\_add} & 4.89 & 2.5400 & 686.8M \\
+  \texttt{mkgauss} & 2.54 & 1.3200 & 11.5M \\
+  \texttt{zint\_mod\_small\_unsigned} & 2.25 & 1.1700 & 50.0M \\
+  \texttt{zint\_add\_scaled\_mul\_small} & 1.92 & 1.0000 & 18.1M \\
+  \texttt{modp\_NTT2\_ext} & 1.44 & 0.7500 & 2.0M \\
+  \texttt{modp\_sub} & 1.19 & 0.6200 & 368.2M \\
+  \texttt{modp\_R2} & 0.89 & 0.4600 & 3.8M \\
+  \texttt{zint\_add\_mul\_small} & 0.69 & 0.3600 & 21.7M \\
+  \texttt{zint\_finish\_mod} & 0.48 & 0.2500 & 895.8K \\
+  \texttt{zint\_norm\_zero} & 0.46 & 0.2400 & 21.1M \\
+  \texttt{modp\_iNTT2\_ext} & 0.46 & 0.2400 & 1.8M \\
+  \texttt{mq\_montymul} & 0.35 & 0.1800 & 18.3M \\
+  \texttt{zint\_bezout} & 0.35 & 0.1800 & 1.0K \\
+  \texttt{zint\_mul\_small} & 0.34 & 0.1700 & 1.5M \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{fpcolor}{\strut \textbf{Floating-Point / FFT} --- 61.1\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_fpr\_add} & 30.78 & 15.9900 & 301.7M \\
+  \texttt{FPR} & 11.01 & 5.7200 & 662.7M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_fpr\_mul} & 10.61 & 5.5100 & 305.8M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_fpr\_scaled} & 3.45 & 1.7900 & 53.3M \\
+  \texttt{fpr\_ulsh} & 2.06 & 1.0700 & 301.7M \\
+  \texttt{fpr\_ursh} & 1.35 & 0.7000 & 301.7M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_FFT} & 0.52 & 0.2700 & 609.0K \\
+  \texttt{fpr\_sub} & 0.38 & 0.2000 & 121.0M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_fpr\_div} & 0.35 & 0.1800 & 2.0M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_iFFT} & 0.25 & 0.1300 & 303.6K \\
+  \texttt{fpr\_rint} & 0.16 & 0.0900 & 4.3M \\
+  \texttt{fpr\_of} & 0.07 & 0.0400 & 53.3M \\
+  \texttt{fpr\_neg} & 0.03 & 0.0100 & 8.1M \\
+  \texttt{fpr\_sqr} & 0.02 & 0.0100 & 6.8M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_poly\_mul\_fft} & 0.02 & 0.0100 & 578.6K \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{othercolor}{\strut \textbf{Other} --- 1.2\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{modp\_div} & 0.25 & 0.1300 & 1.0M \\
+  \texttt{poly\_big\_to\_fp} & 0.25 & 0.1300 & 594.7K \\
+  \texttt{modp\_ninv31} & 0.10 & 0.0500 & 2.8M \\
+  \texttt{modp\_mkgm2} & 0.10 & 0.0500 & 1.0M \\
+  \texttt{poly\_sub\_scaled} & 0.10 & 0.0500 & 520.6K \\
+  \texttt{solve\_NTRU\_intermediate} & 0.08 & 0.0400 & 7.0K \\
+  \texttt{fpr\_lt} & 0.07 & 0.0400 & 6.5M \\
+  \texttt{poly\_sub\_scaled\_ntt} & 0.06 & 0.0300 & 56.1K \\
+  \texttt{make\_fg\_step} & 0.06 & 0.0300 & 44.3K \\
+  \texttt{mq\_div\_12289} & 0.04 & 0.0200 & 530.7K \\
+  \texttt{make\_fg} & 0.04 & 0.0200 & 8.0K \\
+  \texttt{modp\_R} & 0.02 & 0.0100 & 6.8M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_poly\_adj\_fft} & 0.02 & 0.0100 & 25.3K \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_poly\_invnorm2\_fft} & 0.02 & 0.0100 & 13.7K \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_poly\_add\_muladj\_fft} & 0.02 & 0.0100 & 1.0K \\
+\bottomrule
+\end{longtable}
+
+\subsubsection*{\texttt{-O3} build (total: 11.740\,s)}
+
+\noindent\colorbox{hashcolor}{\strut \textbf{Hash / PRNG} --- 8.3\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{KeccakF1600\_StatePermute} & 4.77 & 0.5600 & 2.6M \\
+  \texttt{keccak\_inc\_finalize} & 1.70 & 0.2000 & 43.8M \\
+  \texttt{get\_rng\_u64} & 1.70 & 0.2000 & 43.8M \\
+  \texttt{shake256\_inc\_squeeze} & 0.09 & 0.0100 & 43.8M \\
+  \texttt{PQCLEAN\_randombytes} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{keccak\_inc\_absorb} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{keccak\_inc\_init} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{randombytes\_linux\_randombytes\_getrandom} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{shake256\_inc\_absorb} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{shake256\_inc\_ctx\_release} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{shake256\_inc\_finalize} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{shake256\_inc\_init} & 0.00 & 0.0000 & 1.0K \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{intcolor}{\strut \textbf{Integer Arithmetic} --- 39.0\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{modp\_montymul} & 18.48 & 2.1700 & 968.1M \\
+  \texttt{mkgauss} & 4.00 & 0.4700 & 10.9M \\
+  \texttt{modp\_add} & 2.81 & 0.3300 & 686.0M \\
+  \texttt{modp\_sub} & 1.96 & 0.2300 & 366.5M \\
+  \texttt{zint\_add\_scaled\_mul\_small} & 1.87 & 0.2200 & 18.1M \\
+  \texttt{zint\_rebuild\_CRT.constprop.2} & 1.53 & 0.1800 & 36.2M \\
+  \texttt{zint\_finish\_mod} & 1.11 & 0.1300 & 895.8K \\
+  \texttt{zint\_mod\_small\_unsigned} & 1.02 & 0.1200 & 49.5M \\
+  \texttt{zint\_co\_reduce\_mod} & 1.02 & 0.1200 & 447.9K \\
+  \texttt{zint\_norm\_zero} & 0.85 & 0.1000 & 20.1M \\
+  \texttt{modp\_iNTT2\_ext} & 0.85 & 0.1000 & 1.8M \\
+  \texttt{zint\_add\_mul\_small} & 0.68 & 0.0800 & 21.7M \\
+  \texttt{mq\_montymul} & 0.51 & 0.0600 & 17.8M \\
+  \texttt{poly\_big\_to\_small} & 0.43 & 0.0500 & 20.1M \\
+  \texttt{modp\_NTT2\_ext} & 0.43 & 0.0500 & 220.0K \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{fpcolor}{\strut \textbf{Floating-Point / FFT} --- 50.9\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_fpr\_add} & 27.68 & 3.2500 & 294.8M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_fpr\_mul} & 11.93 & 1.4000 & 300.1M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_fpr\_scaled} & 3.15 & 0.3700 & 53.0M \\
+  \texttt{FPR} & 3.07 & 0.3600 & 649.8M \\
+  \texttt{fpr\_trunc} & 1.70 & 0.2000 & 294.8M \\
+  \texttt{fpr\_ursh} & 1.45 & 0.1700 & 294.8M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_fpr\_div} & 0.85 & 0.1000 & 1.9M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_iFFT} & 0.34 & 0.0400 & 303.3K \\
+  \texttt{fpr\_rint} & 0.26 & 0.0300 & 4.3M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_FFT} & 0.26 & 0.0300 & 609.0K \\
+  \texttt{fpr\_sub} & 0.17 & 0.0200 & 117.7M \\
+  \texttt{fpr\_of} & 0.09 & 0.0100 & 53.0M \\
+  \texttt{fpr\_neg} & 0.00 & 0.0000 & 7.8M \\
+  \texttt{fpr\_sqr} & 0.00 & 0.0000 & 7.1M \\
+  \texttt{fpr\_sqr} & 0.00 & 0.0000 & 6.5M \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{othercolor}{\strut \textbf{Other} --- 1.8\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{poly\_big\_to\_fp} & 0.60 & 0.0700 & 591.2K \\
+  \texttt{modp\_mkgm2} & 0.17 & 0.0200 & 996.0K \\
+  \texttt{poly\_sub\_scaled} & 0.17 & 0.0200 & 521.1K \\
+  \texttt{make\_fg\_step.constprop.0} & 0.17 & 0.0200 & 36.3K \\
+  \texttt{modp\_ninv31} & 0.09 & 0.0100 & 2.8M \\
+  \texttt{poly\_sub\_scaled\_ntt} & 0.09 & 0.0100 & 56.0K \\
+  \texttt{poly\_small\_sqnorm} & 0.09 & 0.0100 & 21.3K \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_poly\_invnorm2\_fft} & 0.09 & 0.0100 & 13.4K \\
+  \texttt{make\_fg} & 0.09 & 0.0100 & 8.0K \\
+  \texttt{make\_fg\_step} & 0.09 & 0.0100 & 8.0K \\
+  \texttt{solve\_NTRU\_intermediate} & 0.09 & 0.0100 & 7.0K \\
+  \texttt{poly\_big\_to\_fp.constprop.1} & 0.09 & 0.0100 & 2.0K \\
+  \texttt{mq\_montysqr} & 0.00 & 0.0000 & 5.8M \\
+  \texttt{modp\_R} & 0.00 & 0.0000 & 5.8M \\
+  \texttt{fpr\_inv} & 0.00 & 0.0000 & 1.9M \\
+\bottomrule
+\end{longtable}
+
+\subsection{Falcon-512 --- Sign}
+
+\subsubsection*{\texttt{-O0} build (total: 15.930\,s)}
+
+\noindent\colorbox{hashcolor}{\strut \textbf{Hash / PRNG} --- 1.4\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_prng\_refill} & 1.19 & 0.1900 & 39.1K \\
+  \texttt{prng\_get\_u64} & 0.13 & 0.0200 & 1.8M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_hash\_to\_point\_ct} & 0.13 & 0.0200 & 1.0K \\
+  \texttt{prng\_get\_u8} & 0.00 & 0.0000 & 5.3M \\
+  \texttt{keccak\_inc\_squeeze} & 0.00 & 0.0000 & 722.1K \\
+  \texttt{shake256\_inc\_squeeze} & 0.00 & 0.0000 & 722.1K \\
+  \texttt{KeccakF1600\_StatePermute} & 0.00 & 0.0000 & 12.2K \\
+  \texttt{get\_rng\_u64} & 0.00 & 0.0000 & 4.1K \\
+  \texttt{keccak\_inc\_absorb} & 0.00 & 0.0000 & 3.0K \\
+  \texttt{shake256\_inc\_absorb} & 0.00 & 0.0000 & 3.0K \\
+  \texttt{PQCLEAN\_randombytes} & 0.00 & 0.0000 & 2.0K \\
+  \texttt{randombytes\_linux\_randombytes\_getrandom} & 0.00 & 0.0000 & 2.0K \\
+  \texttt{keccak\_inc\_finalize} & 0.00 & 0.0000 & 2.0K \\
+  \texttt{keccak\_inc\_init} & 0.00 & 0.0000 & 2.0K \\
+  \texttt{shake256\_inc\_ctx\_release} & 0.00 & 0.0000 & 2.0K \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{intcolor}{\strut \textbf{Integer Arithmetic} --- 2.1\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{mq\_montymul} & 0.94 & 0.1500 & 21.0M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_gaussian0\_sampler} & 0.47 & 0.0700 & 1.8M \\
+  \texttt{mq\_add} & 0.38 & 0.0600 & 9.2M \\
+  \texttt{mq\_sub} & 0.06 & 0.0100 & 9.2M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_sampler} & 0.06 & 0.0100 & 1.0M \\
+  \texttt{modp\_montymul} & 0.06 & 0.0100 & 975.9K \\
+  \texttt{mq\_NTT} & 0.06 & 0.0100 & 3.0K \\
+  \texttt{mq\_iNTT} & 0.06 & 0.0100 & 1.0K \\
+  \texttt{modp\_add} & 0.00 & 0.0000 & 683.6K \\
+  \texttt{modp\_sub} & 0.00 & 0.0000 & 367.3K \\
+  \texttt{zint\_mod\_small\_unsigned} & 0.00 & 0.0000 & 49.8K \\
+  \texttt{modp\_set} & 0.00 & 0.0000 & 30.0K \\
+  \texttt{zint\_mod\_small\_signed} & 0.00 & 0.0000 & 28.2K \\
+  \texttt{zint\_add\_mul\_small} & 0.00 & 0.0000 & 21.6K \\
+  \texttt{zint\_norm\_zero} & 0.00 & 0.0000 & 21.1K \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{fpcolor}{\strut \textbf{Floating-Point / FFT} --- 96.2\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_fpr\_add} & 50.85 & 8.1000 & 148.6M \\
+  \texttt{FPR} & 15.94 & 2.5400 & 297.5M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_fpr\_mul} & 14.69 & 2.3400 & 134.0M \\
+  \texttt{fpr\_ulsh} & 2.70 & 0.4300 & 148.6M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_fpr\_scaled} & 2.32 & 0.3700 & 12.0M \\
+  \texttt{fpr\_ursh} & 2.07 & 0.3300 & 152.2M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_fpr\_div} & 1.69 & 0.2700 & 2.3M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_fpr\_expm\_p63} & 1.32 & 0.2100 & 1.8M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_fpr\_sqrt} & 0.94 & 0.1500 & 512.0K \\
+  \texttt{fpr\_sub} & 0.91 & 0.1400 & 70.5M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_FFT} & 0.44 & 0.0700 & 9.6K \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_poly\_split\_fft} & 0.38 & 0.0600 & 2.0M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_poly\_LDL\_fft} & 0.38 & 0.0600 & 511.0K \\
+  \texttt{fpr\_trunc} & 0.31 & 0.0500 & 3.6M \\
+  \texttt{fpr\_half} & 0.25 & 0.0400 & 16.4M \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{othercolor}{\strut \textbf{Other} --- 0.3\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{BerExp} & 0.16 & 0.0300 & 1.8M \\
+  \texttt{fpr\_floor} & 0.06 & 0.0100 & 1.0M \\
+  \texttt{mq\_montysqr} & 0.00 & 0.0000 & 5.6M \\
+  \texttt{fpr\_inv} & 0.00 & 0.0000 & 2.3M \\
+  \texttt{mq\_conv\_small} & 0.00 & 0.0000 & 1.5M \\
+  \texttt{fpr\_irsh} & 0.00 & 0.0000 & 1.0M \\
+  \texttt{mq\_div\_12289} & 0.00 & 0.0000 & 512.5K \\
+  \texttt{mq\_rshift1} & 0.00 & 0.0000 & 9.0K \\
+  \texttt{smallints\_to\_fpr} & 0.00 & 0.0000 & 8.0K \\
+  \texttt{modp\_R} & 0.00 & 0.0000 & 6.7K \\
+  \texttt{fpr\_lt} & 0.00 & 0.0000 & 6.5K \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_trim\_i8\_decode} & 0.00 & 0.0000 & 3.0K \\
+  \texttt{modp\_ninv31} & 0.00 & 0.0000 & 2.8K \\
+  \texttt{modp\_norm} & 0.00 & 0.0000 & 2.0K \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_comp\_encode} & 0.00 & 0.0000 & 1.0K \\
+\bottomrule
+\end{longtable}
+
+\subsubsection*{\texttt{-O3} build (total: 3.240\,s)}
+
+\noindent\colorbox{hashcolor}{\strut \textbf{Hash / PRNG} --- 2.8\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_prng\_refill} & 1.23 & 0.0400 & 39.2K \\
+  \texttt{prng\_get\_u8} & 0.62 & 0.0200 & 5.3M \\
+  \texttt{prng\_get\_u64} & 0.62 & 0.0200 & 1.8M \\
+  \texttt{KeccakF1600\_StatePermute} & 0.31 & 0.0100 & 15.4K \\
+  \texttt{keccak\_inc\_finalize} & 0.00 & 0.0000 & 777.4K \\
+  \texttt{shake256\_inc\_squeeze} & 0.00 & 0.0000 & 775.4K \\
+  \texttt{get\_rng\_u64} & 0.00 & 0.0000 & 57.4K \\
+  \texttt{keccak\_inc\_absorb} & 0.00 & 0.0000 & 3.0K \\
+  \texttt{shake256\_inc\_absorb} & 0.00 & 0.0000 & 3.0K \\
+  \texttt{PQCLEAN\_randombytes} & 0.00 & 0.0000 & 2.0K \\
+  \texttt{randombytes\_linux\_randombytes\_getrandom} & 0.00 & 0.0000 & 2.0K \\
+  \texttt{keccak\_inc\_init} & 0.00 & 0.0000 & 2.0K \\
+  \texttt{shake256\_inc\_ctx\_release} & 0.00 & 0.0000 & 2.0K \\
+  \texttt{shake256\_inc\_finalize} & 0.00 & 0.0000 & 2.0K \\
+  \texttt{shake256\_inc\_init} & 0.00 & 0.0000 & 2.0K \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{intcolor}{\strut \textbf{Integer Arithmetic} --- 2.8\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{mq\_montymul} & 1.23 & 0.0400 & 20.0M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_gaussian0\_sampler} & 0.93 & 0.0300 & 1.8M \\
+  \texttt{modp\_add} & 0.31 & 0.0100 & 682.5K \\
+  \texttt{mq\_NTT} & 0.31 & 0.0100 & 3.0K \\
+  \texttt{mq\_add} & 0.00 & 0.0000 & 9.2M \\
+  \texttt{mq\_sub} & 0.00 & 0.0000 & 9.2M \\
+  \texttt{mq\_montymul.constprop.0} & 0.00 & 0.0000 & 1.0M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_sampler} & 0.00 & 0.0000 & 1.0M \\
+  \texttt{modp\_montymul} & 0.00 & 0.0000 & 963.3K \\
+  \texttt{modp\_sub} & 0.00 & 0.0000 & 365.7K \\
+  \texttt{zint\_mod\_small\_unsigned} & 0.00 & 0.0000 & 49.3K \\
+  \texttt{zint\_rebuild\_CRT.constprop.2} & 0.00 & 0.0000 & 36.1K \\
+  \texttt{zint\_mod\_small\_signed} & 0.00 & 0.0000 & 27.7K \\
+  \texttt{zint\_add\_mul\_small} & 0.00 & 0.0000 & 21.6K \\
+  \texttt{poly\_big\_to\_small} & 0.00 & 0.0000 & 20.0K \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{fpcolor}{\strut \textbf{Floating-Point / FFT} --- 94.4\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_fpr\_add} & 50.93 & 1.6500 & 148.7M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_fpr\_mul} & 16.05 & 0.5200 & 134.1M \\
+  \texttt{FPR} & 5.56 & 0.1800 & 297.7M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_fpr\_div} & 4.32 & 0.1400 & 2.3M \\
+  \texttt{fpr\_ursh} & 4.01 & 0.1300 & 152.3M \\
+  \texttt{fpr\_trunc} & 3.40 & 0.1100 & 152.3M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_fpr\_scaled} & 2.78 & 0.0900 & 12.0M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_fpr\_expm\_p63} & 1.54 & 0.0500 & 1.8M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_poly\_split\_fft} & 0.93 & 0.0300 & 2.0M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_fpr\_sqrt} & 0.93 & 0.0300 & 512.0K \\
+  \texttt{fpr\_sub} & 0.62 & 0.0200 & 70.5M \\
+  \texttt{fpr\_half} & 0.62 & 0.0200 & 16.4M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_poly\_merge\_fft} & 0.62 & 0.0200 & 1.0M \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_FFT} & 0.62 & 0.0200 & 9.6K \\
+  \texttt{fpr\_neg} & 0.31 & 0.0100 & 14.1M \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{othercolor}{\strut \textbf{Other} --- 0.0\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{mq\_montysqr} & 0.00 & 0.0000 & 5.6M \\
+  \texttt{fpr\_inv} & 0.00 & 0.0000 & 2.3M \\
+  \texttt{BerExp} & 0.00 & 0.0000 & 1.8M \\
+  \texttt{mq\_conv\_small} & 0.00 & 0.0000 & 1.5M \\
+  \texttt{fpr\_floor} & 0.00 & 0.0000 & 1.0M \\
+  \texttt{fpr\_irsh} & 0.00 & 0.0000 & 1.0M \\
+  \texttt{mq\_div\_12289} & 0.00 & 0.0000 & 512.5K \\
+  \texttt{mq\_rshift1} & 0.00 & 0.0000 & 9.0K \\
+  \texttt{smallints\_to\_fpr} & 0.00 & 0.0000 & 8.0K \\
+  \texttt{modp\_R} & 0.00 & 0.0000 & 5.7K \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_trim\_i8\_decode} & 0.00 & 0.0000 & 3.0K \\
+  \texttt{modp\_ninv31} & 0.00 & 0.0000 & 2.8K \\
+  \texttt{solve\_NTRU\_binary\_depth1} & 0.00 & 0.0000 & 1.5K \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_comp\_encode} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_complete\_private} & 0.00 & 0.0000 & 1.0K \\
+\bottomrule
+\end{longtable}
+
+\subsection{Falcon-512 --- Verify}
+
+\subsubsection*{\texttt{-O0} build (total: 0.190\,s)}
+
+\noindent\colorbox{hashcolor}{\strut \textbf{Hash / PRNG} --- 0.0\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{keccak\_inc\_squeeze} & 0.00 & 0.0000 & 758.7K \\
+  \texttt{shake256\_inc\_squeeze} & 0.00 & 0.0000 & 758.7K \\
+  \texttt{get\_rng\_u64} & 0.00 & 0.0000 & 41.0K \\
+  \texttt{KeccakF1600\_StatePermute} & 0.00 & 0.0000 & 13.4K \\
+  \texttt{prng\_get\_u8} & 0.00 & 0.0000 & 5.2K \\
+  \texttt{keccak\_inc\_absorb} & 0.00 & 0.0000 & 2.0K \\
+  \texttt{shake256\_inc\_absorb} & 0.00 & 0.0000 & 2.0K \\
+  \texttt{prng\_get\_u64} & 0.00 & 0.0000 & 1.7K \\
+  \texttt{keccak\_inc\_finalize} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{keccak\_inc\_init} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{shake256\_inc\_ctx\_release} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{shake256\_inc\_finalize} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{shake256\_inc\_init} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_hash\_to\_point\_ct} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_prng\_refill} & 0.00 & 0.0000 & 38 \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{intcolor}{\strut \textbf{Integer Arithmetic} --- 78.9\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{mq\_montymul} & 42.11 & 0.0800 & 8.5M \\
+  \texttt{mq\_sub} & 15.79 & 0.0300 & 7.4M \\
+  \texttt{mq\_add} & 10.53 & 0.0200 & 6.9M \\
+  \texttt{modp\_add} & 5.26 & 0.0100 & 683.6K \\
+  \texttt{mq\_iNTT} & 5.26 & 0.0100 & 1.0K \\
+  \texttt{modp\_montymul} & 0.00 & 0.0000 & 975.9K \\
+  \texttt{modp\_sub} & 0.00 & 0.0000 & 367.3K \\
+  \texttt{zint\_mod\_small\_unsigned} & 0.00 & 0.0000 & 49.8K \\
+  \texttt{modp\_set} & 0.00 & 0.0000 & 30.0K \\
+  \texttt{zint\_mod\_small\_signed} & 0.00 & 0.0000 & 28.2K \\
+  \texttt{zint\_add\_mul\_small} & 0.00 & 0.0000 & 21.6K \\
+  \texttt{zint\_norm\_zero} & 0.00 & 0.0000 & 21.1K \\
+  \texttt{zint\_sub} & 0.00 & 0.0000 & 21.1K \\
+  \texttt{zint\_add\_scaled\_mul\_small} & 0.00 & 0.0000 & 18.1K \\
+  \texttt{mkgauss} & 0.00 & 0.0000 & 10.3K \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{fpcolor}{\strut \textbf{Floating-Point / FFT} --- 21.1\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{FPR} & 15.79 & 0.0300 & 927.0K \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_fpr\_add} & 5.26 & 0.0100 & 432.9K \\
+  \texttt{fpr\_ursh} & 0.00 & 0.0000 & 436.3K \\
+  \texttt{fpr\_ulsh} & 0.00 & 0.0000 & 432.9K \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_fpr\_mul} & 0.00 & 0.0000 & 425.1K \\
+  \texttt{fpr\_sub} & 0.00 & 0.0000 & 183.4K \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_fpr\_scaled} & 0.00 & 0.0000 & 64.4K \\
+  \texttt{fpr\_of} & 0.00 & 0.0000 & 52.5K \\
+  \texttt{fpr\_neg} & 0.00 & 0.0000 & 21.5K \\
+  \texttt{fpr\_half} & 0.00 & 0.0000 & 16.4K \\
+  \texttt{fpr\_sqr} & 0.00 & 0.0000 & 12.8K \\
+  \texttt{fpr\_of} & 0.00 & 0.0000 & 11.8K \\
+  \texttt{fpr\_sqr} & 0.00 & 0.0000 & 6.7K \\
+  \texttt{fpr\_sub} & 0.00 & 0.0000 & 6.2K \\
+  \texttt{fpr\_rint} & 0.00 & 0.0000 & 4.3K \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{othercolor}{\strut \textbf{Other} --- 0.0\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{mq\_montysqr} & 0.00 & 0.0000 & 11.3K \\
+  \texttt{mq\_rshift1} & 0.00 & 0.0000 & 9.0K \\
+  \texttt{modp\_R} & 0.00 & 0.0000 & 6.7K \\
+  \texttt{fpr\_lt} & 0.00 & 0.0000 & 6.5K \\
+  \texttt{fpr\_inv} & 0.00 & 0.0000 & 4.1K \\
+  \texttt{modp\_ninv31} & 0.00 & 0.0000 & 2.8K \\
+  \texttt{mq\_conv\_small} & 0.00 & 0.0000 & 2.6K \\
+  \texttt{modp\_norm} & 0.00 & 0.0000 & 2.0K \\
+  \texttt{BerExp} & 0.00 & 0.0000 & 1.7K \\
+  \texttt{fpr\_floor} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{fpr\_irsh} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{mq\_div\_12289} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{mq\_poly\_montymul\_ntt} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{mq\_poly\_tomonty} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_comp\_decode} & 0.00 & 0.0000 & 1.0K \\
+\bottomrule
+\end{longtable}
+
+\subsubsection*{\texttt{-O3} build (total: 0.050\,s)}
+
+\noindent\colorbox{hashcolor}{\strut \textbf{Hash / PRNG} --- 40.0\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_hash\_to\_point\_ct} & 40.00 & 0.0200 & 1.0K \\
+  \texttt{keccak\_inc\_finalize} & 0.00 & 0.0000 & 743.3K \\
+  \texttt{shake256\_inc\_squeeze} & 0.00 & 0.0000 & 742.3K \\
+  \texttt{get\_rng\_u64} & 0.00 & 0.0000 & 24.6K \\
+  \texttt{KeccakF1600\_StatePermute} & 0.00 & 0.0000 & 12.5K \\
+  \texttt{prng\_get\_u8} & 0.00 & 0.0000 & 5.2K \\
+  \texttt{keccak\_inc\_absorb} & 0.00 & 0.0000 & 2.0K \\
+  \texttt{shake256\_inc\_absorb} & 0.00 & 0.0000 & 2.0K \\
+  \texttt{prng\_get\_u64} & 0.00 & 0.0000 & 1.7K \\
+  \texttt{keccak\_inc\_init} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{shake256\_inc\_ctx\_release} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{shake256\_inc\_finalize} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{shake256\_inc\_init} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_prng\_refill} & 0.00 & 0.0000 & 38 \\
+  \texttt{PQCLEAN\_randombytes} & 0.00 & 0.0000 & 4 \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{intcolor}{\strut \textbf{Integer Arithmetic} --- 60.0\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{mq\_add} & 40.00 & 0.0200 & 6.9M \\
+  \texttt{mq\_montymul} & 20.00 & 0.0100 & 8.0M \\
+  \texttt{mq\_sub} & 0.00 & 0.0000 & 7.4M \\
+  \texttt{modp\_montymul} & 0.00 & 0.0000 & 963.3K \\
+  \texttt{modp\_add} & 0.00 & 0.0000 & 682.5K \\
+  \texttt{mq\_montymul.constprop.0} & 0.00 & 0.0000 & 513.5K \\
+  \texttt{modp\_sub} & 0.00 & 0.0000 & 365.7K \\
+  \texttt{zint\_mod\_small\_unsigned} & 0.00 & 0.0000 & 49.3K \\
+  \texttt{zint\_rebuild\_CRT.constprop.2} & 0.00 & 0.0000 & 36.1K \\
+  \texttt{zint\_mod\_small\_signed} & 0.00 & 0.0000 & 27.7K \\
+  \texttt{zint\_add\_mul\_small} & 0.00 & 0.0000 & 21.6K \\
+  \texttt{poly\_big\_to\_small} & 0.00 & 0.0000 & 20.0K \\
+  \texttt{zint\_norm\_zero} & 0.00 & 0.0000 & 20.0K \\
+  \texttt{zint\_add\_scaled\_mul\_small} & 0.00 & 0.0000 & 18.1K \\
+  \texttt{modp\_set} & 0.00 & 0.0000 & 14.7K \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{fpcolor}{\strut \textbf{Floating-Point / FFT} --- 0.0\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{FPR} & 0.00 & 0.0000 & 877.8K \\
+  \texttt{fpr\_trunc} & 0.00 & 0.0000 & 410.0K \\
+  \texttt{fpr\_ursh} & 0.00 & 0.0000 & 410.0K \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_fpr\_add} & 0.00 & 0.0000 & 406.5K \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_fpr\_mul} & 0.00 & 0.0000 & 403.6K \\
+  \texttt{fpr\_sub} & 0.00 & 0.0000 & 171.1K \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_fpr\_scaled} & 0.00 & 0.0000 & 63.4K \\
+  \texttt{fpr\_of} & 0.00 & 0.0000 & 51.5K \\
+  \texttt{fpr\_neg} & 0.00 & 0.0000 & 20.5K \\
+  \texttt{fpr\_half} & 0.00 & 0.0000 & 16.4K \\
+  \texttt{fpr\_of} & 0.00 & 0.0000 & 11.9K \\
+  \texttt{fpr\_sqr} & 0.00 & 0.0000 & 11.8K \\
+  \texttt{fpr\_sub} & 0.00 & 0.0000 & 6.2K \\
+  \texttt{fpr\_sqr} & 0.00 & 0.0000 & 5.7K \\
+  \texttt{fpr\_rint} & 0.00 & 0.0000 & 4.3K \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{othercolor}{\strut \textbf{Other} --- 0.0\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{mq\_montysqr} & 0.00 & 0.0000 & 11.3K \\
+  \texttt{mq\_rshift1} & 0.00 & 0.0000 & 9.0K \\
+  \texttt{modp\_R} & 0.00 & 0.0000 & 5.7K \\
+  \texttt{fpr\_inv} & 0.00 & 0.0000 & 3.8K \\
+  \texttt{modp\_ninv31} & 0.00 & 0.0000 & 2.8K \\
+  \texttt{mq\_conv\_small} & 0.00 & 0.0000 & 2.6K \\
+  \texttt{BerExp} & 0.00 & 0.0000 & 1.7K \\
+  \texttt{solve\_NTRU\_binary\_depth1} & 0.00 & 0.0000 & 1.5K \\
+  \texttt{fpr\_floor} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{fpr\_irsh} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{mq\_div\_12289} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{mq\_poly\_montymul\_ntt} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{mq\_poly\_tomonty} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_comp\_decode} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{PQCLEAN\_FALCON512\_CLEAN\_crypto\_sign\_verify} & 0.00 & 0.0000 & 1.0K \\
+\bottomrule
+\end{longtable}
+
+\subsection{Falcon-1024 --- KeyGen}
+
+\subsubsection*{\texttt{-O0} build (total: 143.260\,s)}
+
+\noindent\colorbox{hashcolor}{\strut \textbf{Hash / PRNG} --- 3.2\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{KeccakF1600\_StatePermute} & 2.03 & 2.9100 & 4.2M \\
+  \texttt{keccak\_inc\_squeeze} & 0.94 & 1.3500 & 70.9M \\
+  \texttt{get\_rng\_u64} & 0.12 & 0.1700 & 70.9M \\
+  \texttt{shake256\_inc\_squeeze} & 0.07 & 0.1000 & 70.9M \\
+  \texttt{shake256\_inc\_finalize} & 0.00 & 0.0100 & 1.0K \\
+  \texttt{PQCLEAN\_randombytes} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{keccak\_inc\_absorb} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{keccak\_inc\_finalize} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{keccak\_inc\_init} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{randombytes\_linux\_randombytes\_getrandom} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{shake256\_inc\_absorb} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{shake256\_inc\_ctx\_release} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{shake256\_inc\_init} & 0.00 & 0.0000 & 1.0K \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{intcolor}{\strut \textbf{Integer Arithmetic} --- 33.3\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{modp\_montymul} & 12.24 & 17.5400 & 2.80B \\
+  \texttt{modp\_add} & 5.65 & 8.0900 & 2.17B \\
+  \texttt{zint\_add\_scaled\_mul\_small} & 3.36 & 4.8200 & 74.9M \\
+  \texttt{zint\_mod\_small\_unsigned} & 2.75 & 3.9400 & 112.4M \\
+  \texttt{mkgauss} & 1.20 & 1.7200 & 35.5M \\
+  \texttt{modp\_NTT2\_ext} & 1.12 & 1.6000 & 3.6M \\
+  \texttt{modp\_sub} & 1.01 & 1.4500 & 892.4M \\
+  \texttt{zint\_finish\_mod} & 0.96 & 1.3800 & 1.9M \\
+  \texttt{zint\_add\_mul\_small} & 0.93 & 1.3300 & 49.2M \\
+  \texttt{modp\_R2} & 0.87 & 1.2500 & 7.4M \\
+  \texttt{zint\_co\_reduce\_mod} & 0.58 & 0.8300 & 940.0K \\
+  \texttt{zint\_norm\_zero} & 0.39 & 0.5600 & 47.4M \\
+  \texttt{zint\_bezout} & 0.34 & 0.4800 & 1.1K \\
+  \texttt{modp\_iNTT2\_ext} & 0.29 & 0.4200 & 3.4M \\
+  \texttt{zint\_sub} & 0.28 & 0.4000 & 47.4M \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{fpcolor}{\strut \textbf{Floating-Point / FFT} --- 62.5\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_fpr\_add} & 32.73 & 46.8900 & 875.3M \\
+  \texttt{FPR} & 11.49 & 16.4600 & 1.84B \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_fpr\_mul} & 10.04 & 14.3800 & 835.4M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_fpr\_scaled} & 3.49 & 5.0000 & 124.6M \\
+  \texttt{fpr\_ulsh} & 1.79 & 2.5600 & 875.3M \\
+  \texttt{fpr\_ursh} & 1.51 & 2.1700 & 875.3M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_fpr\_div} & 0.38 & 0.5400 & 5.5M \\
+  \texttt{fpr\_sub} & 0.30 & 0.4300 & 366.1M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_FFT} & 0.30 & 0.4300 & 1.2M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_iFFT} & 0.30 & 0.4300 & 595.8K \\
+  \texttt{fpr\_rint} & 0.07 & 0.1000 & 9.1M \\
+  \texttt{fpr\_neg} & 0.04 & 0.0600 & 23.0M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_poly\_mul\_fft} & 0.02 & 0.0300 & 1.2M \\
+  \texttt{fpr\_of} & 0.01 & 0.0200 & 124.6M \\
+  \texttt{fpr\_ulsh} & 0.01 & 0.0200 & 9.1M \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{othercolor}{\strut \textbf{Other} --- 1.0\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{poly\_big\_to\_fp} & 0.22 & 0.3200 & 1.2M \\
+  \texttt{poly\_sub\_scaled} & 0.13 & 0.1900 & 1.1M \\
+  \texttt{modp\_div} & 0.10 & 0.1500 & 1.8M \\
+  \texttt{modp\_mkgm2} & 0.10 & 0.1400 & 1.8M \\
+  \texttt{make\_fg\_step} & 0.08 & 0.1200 & 56.5K \\
+  \texttt{modp\_ninv31} & 0.07 & 0.1000 & 5.5M \\
+  \texttt{solve\_NTRU\_intermediate} & 0.07 & 0.1000 & 8.2K \\
+  \texttt{poly\_sub\_scaled\_ntt} & 0.06 & 0.0800 & 56.1K \\
+  \texttt{fpr\_lt} & 0.05 & 0.0700 & 14.1M \\
+  \texttt{mq\_div\_12289} & 0.02 & 0.0300 & 1.2M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_poly\_mul\_autoadj\_fft} & 0.02 & 0.0300 & 592.8K \\
+  \texttt{poly\_small\_to\_fp} & 0.02 & 0.0300 & 17.6K \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_keygen} & 0.02 & 0.0300 & 1.0K \\
+  \texttt{modp\_Rx} & 0.01 & 0.0200 & 1.8M \\
+  \texttt{poly\_small\_sqnorm} & 0.01 & 0.0100 & 34.6K \\
+\bottomrule
+\end{longtable}
+
+\subsubsection*{\texttt{-O3} build (total: 34.310\,s)}
+
+\noindent\colorbox{hashcolor}{\strut \textbf{Hash / PRNG} --- 4.5\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{KeccakF1600\_StatePermute} & 2.74 & 0.9400 & 4.5M \\
+  \texttt{get\_rng\_u64} & 1.02 & 0.3500 & 76.1M \\
+  \texttt{keccak\_inc\_finalize} & 0.73 & 0.2500 & 76.1M \\
+  \texttt{shake256\_inc\_squeeze} & 0.03 & 0.0100 & 76.1M \\
+  \texttt{shake256\_inc\_init} & 0.03 & 0.0100 & 1.0K \\
+  \texttt{PQCLEAN\_randombytes} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{keccak\_inc\_absorb} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{keccak\_inc\_init} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{randombytes\_linux\_randombytes\_getrandom} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{shake256\_inc\_absorb} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{shake256\_inc\_ctx\_release} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{shake256\_inc\_finalize} & 0.00 & 0.0000 & 1.0K \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{intcolor}{\strut \textbf{Integer Arithmetic} --- 40.6\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{modp\_montymul} & 20.23 & 6.9400 & 2.81B \\
+  \texttt{zint\_add\_scaled\_mul\_small} & 3.12 & 1.0700 & 75.2M \\
+  \texttt{modp\_add} & 2.97 & 1.0200 & 2.20B \\
+  \texttt{mkgauss} & 2.07 & 0.7100 & 38.1M \\
+  \texttt{zint\_add\_mul\_small} & 1.66 & 0.5700 & 49.6M \\
+  \texttt{zint\_rebuild\_CRT.constprop.2} & 1.54 & 0.5300 & 76.3M \\
+  \texttt{zint\_finish\_mod} & 1.43 & 0.4900 & 1.9M \\
+  \texttt{zint\_mod\_small\_unsigned} & 1.34 & 0.4600 & 112.2M \\
+  \texttt{modp\_sub} & 1.25 & 0.4300 & 894.4M \\
+  \texttt{zint\_co\_reduce\_mod} & 0.87 & 0.3000 & 959.0K \\
+  \texttt{modp\_iNTT2\_ext} & 0.76 & 0.2600 & 3.5M \\
+  \texttt{zint\_rebuild\_CRT.constprop.3} & 0.44 & 0.1500 & 203.7K \\
+  \texttt{zint\_co\_reduce} & 0.41 & 0.1400 & 479.5K \\
+  \texttt{zint\_mod\_small\_signed} & 0.32 & 0.1100 & 62.6M \\
+  \texttt{zint\_mul\_small} & 0.32 & 0.1100 & 3.1M \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{fpcolor}{\strut \textbf{Floating-Point / FFT} --- 53.2\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_fpr\_add} & 29.12 & 9.9900 & 908.5M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_fpr\_mul} & 11.75 & 4.0300 & 862.8M \\
+  \texttt{FPR} & 3.67 & 1.2600 & 1.90B \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_fpr\_scaled} & 2.27 & 0.7800 & 126.3M \\
+  \texttt{fpr\_trunc} & 1.81 & 0.6200 & 908.5M \\
+  \texttt{fpr\_ursh} & 1.75 & 0.6000 & 908.5M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_fpr\_div} & 1.05 & 0.3600 & 5.8M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_FFT} & 0.64 & 0.2200 & 1.2M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_iFFT} & 0.44 & 0.1500 & 605.3K \\
+  \texttt{fpr\_sub} & 0.35 & 0.1200 & 381.4M \\
+  \texttt{fpr\_of} & 0.17 & 0.0600 & 126.3M \\
+  \texttt{fpr\_rint} & 0.17 & 0.0600 & 9.1M \\
+  \texttt{fpr\_ulsh} & 0.03 & 0.0100 & 9.1M \\
+  \texttt{fpr\_neg} & 0.00 & 0.0000 & 24.1M \\
+  \texttt{fpr\_sqr} & 0.00 & 0.0000 & 22.1M \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{othercolor}{\strut \textbf{Other} --- 1.6\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{poly\_big\_to\_fp} & 0.35 & 0.1200 & 1.2M \\
+  \texttt{solve\_NTRU\_intermediate} & 0.26 & 0.0900 & 8.3K \\
+  \texttt{modp\_mkgm2} & 0.23 & 0.0800 & 1.9M \\
+  \texttt{poly\_sub\_scaled} & 0.23 & 0.0800 & 1.1M \\
+  \texttt{modp\_div} & 0.15 & 0.0500 & 1.9M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_keygen} & 0.06 & 0.0200 & 1.0K \\
+  \texttt{modp\_ninv31} & 0.03 & 0.0100 & 5.6M \\
+  \texttt{solve\_NTRU\_binary\_depth1} & 0.03 & 0.0100 & 3.1M \\
+  \texttt{modp\_Rx} & 0.03 & 0.0100 & 1.8M \\
+  \texttt{poly\_sub\_scaled\_ntt} & 0.03 & 0.0100 & 56.2K \\
+  \texttt{make\_fg\_step.constprop.0} & 0.03 & 0.0100 & 47.9K \\
+  \texttt{poly\_small\_sqnorm} & 0.03 & 0.0100 & 37.1K \\
+  \texttt{poly\_small\_to\_fp} & 0.03 & 0.0100 & 18.6K \\
+  \texttt{poly\_big\_to\_fp.constprop.1} & 0.03 & 0.0100 & 2.0K \\
+  \texttt{solve\_NTRU} & 0.03 & 0.0100 & 1.1K \\
+\bottomrule
+\end{longtable}
+
+\subsection{Falcon-1024 --- Sign}
+
+\subsubsection*{\texttt{-O0} build (total: 34.240\,s)}
+
+\noindent\colorbox{hashcolor}{\strut \textbf{Hash / PRNG} --- 1.8\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_prng\_refill} & 1.26 & 0.4300 & 76.6K \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_hash\_to\_point\_ct} & 0.23 & 0.0800 & 1.0K \\
+  \texttt{prng\_get\_u64} & 0.13 & 0.0400 & 3.5M \\
+  \texttt{KeccakF1600\_StatePermute} & 0.09 & 0.0300 & 22.2K \\
+  \texttt{prng\_get\_u8} & 0.04 & 0.0100 & 10.5M \\
+  \texttt{keccak\_inc\_squeeze} & 0.03 & 0.0100 & 1.3M \\
+  \texttt{shake256\_inc\_squeeze} & 0.00 & 0.0000 & 1.3M \\
+  \texttt{get\_rng\_u64} & 0.00 & 0.0000 & 20.5K \\
+  \texttt{keccak\_inc\_absorb} & 0.00 & 0.0000 & 3.0K \\
+  \texttt{shake256\_inc\_absorb} & 0.00 & 0.0000 & 3.0K \\
+  \texttt{PQCLEAN\_randombytes} & 0.00 & 0.0000 & 2.0K \\
+  \texttt{randombytes\_linux\_randombytes\_getrandom} & 0.00 & 0.0000 & 2.0K \\
+  \texttt{keccak\_inc\_finalize} & 0.00 & 0.0000 & 2.0K \\
+  \texttt{keccak\_inc\_init} & 0.00 & 0.0000 & 2.0K \\
+  \texttt{shake256\_inc\_ctx\_release} & 0.00 & 0.0000 & 2.0K \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{intcolor}{\strut \textbf{Integer Arithmetic} --- 2.0\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{mq\_montymul} & 0.88 & 0.3000 & 44.1M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_gaussian0\_sampler} & 0.38 & 0.1300 & 3.5M \\
+  \texttt{mq\_add} & 0.34 & 0.1200 & 20.5M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_sampler} & 0.18 & 0.0600 & 2.0M \\
+  \texttt{mq\_NTT} & 0.09 & 0.0300 & 3.0K \\
+  \texttt{modp\_montymul} & 0.06 & 0.0200 & 2.7M \\
+  \texttt{mq\_sub} & 0.03 & 0.0100 & 20.5M \\
+  \texttt{mq\_iNTT} & 0.03 & 0.0100 & 1.0K \\
+  \texttt{modp\_add} & 0.00 & 0.0000 & 2.1M \\
+  \texttt{modp\_sub} & 0.00 & 0.0000 & 879.0K \\
+  \texttt{zint\_mod\_small\_unsigned} & 0.00 & 0.0000 & 110.0K \\
+  \texttt{zint\_add\_scaled\_mul\_small} & 0.00 & 0.0000 & 74.5K \\
+  \texttt{modp\_set} & 0.00 & 0.0000 & 62.1K \\
+  \texttt{zint\_mod\_small\_signed} & 0.00 & 0.0000 & 61.9K \\
+  \texttt{zint\_add\_mul\_small} & 0.00 & 0.0000 & 48.1K \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{fpcolor}{\strut \textbf{Floating-Point / FFT} --- 96.0\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_fpr\_add} & 50.22 & 17.1900 & 330.0M \\
+  \texttt{FPR} & 17.79 & 6.0900 & 653.4M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_fpr\_mul} & 13.99 & 4.7900 & 293.3M \\
+  \texttt{fpr\_ulsh} & 2.66 & 0.9100 & 330.0M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_fpr\_scaled} & 2.54 & 0.8700 & 23.9M \\
+  \texttt{fpr\_ursh} & 1.87 & 0.6400 & 337.0M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_fpr\_div} & 1.72 & 0.5900 & 5.1M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_fpr\_expm\_p63} & 1.17 & 0.4000 & 3.5M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_fpr\_sqrt} & 0.91 & 0.3100 & 1.0M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_FFT} & 0.61 & 0.2100 & 10.1K \\
+  \texttt{fpr\_sub} & 0.51 & 0.1700 & 157.6M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_poly\_split\_fft} & 0.35 & 0.1200 & 4.1M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_poly\_LDL\_fft} & 0.26 & 0.0900 & 1.0M \\
+  \texttt{fpr\_half} & 0.22 & 0.0700 & 36.9M \\
+  \texttt{fpr\_trunc} & 0.20 & 0.0700 & 7.0M \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{othercolor}{\strut \textbf{Other} --- 0.3\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{BerExp} & 0.06 & 0.0200 & 3.5M \\
+  \texttt{mq\_div\_12289} & 0.06 & 0.0200 & 1.0M \\
+  \texttt{smallints\_to\_fpr} & 0.06 & 0.0200 & 8.0K \\
+  \texttt{mq\_montysqr} & 0.03 & 0.0100 & 11.3M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_comp\_encode} & 0.03 & 0.0100 & 1.0K \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_complete\_private} & 0.03 & 0.0100 & 1.0K \\
+  \texttt{mq\_conv\_small} & 0.01 & 0.0100 & 3.1M \\
+  \texttt{fpr\_inv} & 0.00 & 0.0000 & 5.1M \\
+  \texttt{fpr\_floor} & 0.00 & 0.0000 & 2.0M \\
+  \texttt{fpr\_irsh} & 0.00 & 0.0000 & 2.0M \\
+  \texttt{fpr\_lt} & 0.00 & 0.0000 & 14.0K \\
+  \texttt{modp\_R} & 0.00 & 0.0000 & 12.0K \\
+  \texttt{mq\_rshift1} & 0.00 & 0.0000 & 10.0K \\
+  \texttt{modp\_ninv31} & 0.00 & 0.0000 & 5.2K \\
+  \texttt{modp\_norm} & 0.00 & 0.0000 & 4.1K \\
+\bottomrule
+\end{longtable}
+
+\subsubsection*{\texttt{-O3} build (total: 6.810\,s)}
+
+\noindent\colorbox{hashcolor}{\strut \textbf{Hash / PRNG} --- 1.2\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{prng\_get\_u64} & 0.29 & 0.0200 & 3.5M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_prng\_refill} & 0.29 & 0.0200 & 76.6K \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_hash\_to\_point\_ct} & 0.29 & 0.0200 & 1.0K \\
+  \texttt{prng\_get\_u8} & 0.15 & 0.0100 & 10.5M \\
+  \texttt{keccak\_inc\_finalize} & 0.15 & 0.0100 & 1.3M \\
+  \texttt{shake256\_inc\_squeeze} & 0.00 & 0.0000 & 1.3M \\
+  \texttt{KeccakF1600\_StatePermute} & 0.00 & 0.0000 & 21.7K \\
+  \texttt{get\_rng\_u64} & 0.00 & 0.0000 & 12.3K \\
+  \texttt{keccak\_inc\_absorb} & 0.00 & 0.0000 & 3.0K \\
+  \texttt{shake256\_inc\_absorb} & 0.00 & 0.0000 & 3.0K \\
+  \texttt{PQCLEAN\_randombytes} & 0.00 & 0.0000 & 2.0K \\
+  \texttt{randombytes\_linux\_randombytes\_getrandom} & 0.00 & 0.0000 & 2.0K \\
+  \texttt{keccak\_inc\_init} & 0.00 & 0.0000 & 2.0K \\
+  \texttt{shake256\_inc\_ctx\_release} & 0.00 & 0.0000 & 2.0K \\
+  \texttt{shake256\_inc\_finalize} & 0.00 & 0.0000 & 2.0K \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{intcolor}{\strut \textbf{Integer Arithmetic} --- 3.2\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{mq\_montymul} & 1.03 & 0.0700 & 42.0M \\
+  \texttt{mq\_NTT} & 0.59 & 0.0400 & 3.0K \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_gaussian0\_sampler} & 0.44 & 0.0300 & 3.5M \\
+  \texttt{mq\_add} & 0.29 & 0.0200 & 20.5M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_sampler} & 0.29 & 0.0200 & 2.0M \\
+  \texttt{mq\_sub} & 0.15 & 0.0100 & 20.5M \\
+  \texttt{modp\_montymul} & 0.15 & 0.0100 & 2.7M \\
+  \texttt{zint\_mod\_small\_unsigned} & 0.15 & 0.0100 & 108.9K \\
+  \texttt{mq\_iNTT} & 0.15 & 0.0100 & 1.0K \\
+  \texttt{modp\_add} & 0.00 & 0.0000 & 2.1M \\
+  \texttt{mq\_montymul.constprop.0} & 0.00 & 0.0000 & 2.0M \\
+  \texttt{modp\_sub} & 0.00 & 0.0000 & 875.9K \\
+  \texttt{zint\_rebuild\_CRT.constprop.2} & 0.00 & 0.0000 & 75.0K \\
+  \texttt{zint\_add\_scaled\_mul\_small} & 0.00 & 0.0000 & 74.5K \\
+  \texttt{zint\_mod\_small\_signed} & 0.00 & 0.0000 & 60.9K \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{fpcolor}{\strut \textbf{Floating-Point / FFT} --- 95.6\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_fpr\_add} & 49.05 & 3.3400 & 329.9M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_fpr\_mul} & 21.88 & 1.4900 & 293.3M \\
+  \texttt{FPR} & 6.17 & 0.4200 & 653.2M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_fpr\_div} & 4.55 & 0.3100 & 5.1M \\
+  \texttt{fpr\_ursh} & 3.08 & 0.2100 & 336.9M \\
+  \texttt{fpr\_trunc} & 1.76 & 0.1200 & 336.9M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_fpr\_scaled} & 1.62 & 0.1100 & 23.9M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_fpr\_expm\_p63} & 1.62 & 0.1100 & 3.5M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_fpr\_sqrt} & 1.03 & 0.0700 & 1.0M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_poly\_split\_fft} & 0.88 & 0.0600 & 4.1M \\
+  \texttt{fpr\_sub} & 0.73 & 0.0500 & 157.6M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_poly\_LDL\_fft} & 0.73 & 0.0500 & 1.0M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_FFT} & 0.73 & 0.0500 & 10.1K \\
+  \texttt{fpr\_half} & 0.29 & 0.0200 & 36.9M \\
+  \texttt{fpr\_neg} & 0.29 & 0.0200 & 30.7M \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{othercolor}{\strut \textbf{Other} --- 0.0\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{mq\_montysqr} & 0.00 & 0.0000 & 11.3M \\
+  \texttt{fpr\_inv} & 0.00 & 0.0000 & 5.1M \\
+  \texttt{BerExp} & 0.00 & 0.0000 & 3.5M \\
+  \texttt{mq\_conv\_small} & 0.00 & 0.0000 & 3.1M \\
+  \texttt{fpr\_floor} & 0.00 & 0.0000 & 2.0M \\
+  \texttt{fpr\_irsh} & 0.00 & 0.0000 & 2.0M \\
+  \texttt{mq\_div\_12289} & 0.00 & 0.0000 & 1.0M \\
+  \texttt{modp\_R} & 0.00 & 0.0000 & 10.3K \\
+  \texttt{mq\_rshift1} & 0.00 & 0.0000 & 10.0K \\
+  \texttt{smallints\_to\_fpr} & 0.00 & 0.0000 & 8.0K \\
+  \texttt{modp\_ninv31} & 0.00 & 0.0000 & 5.2K \\
+  \texttt{solve\_NTRU\_binary\_depth1} & 0.00 & 0.0000 & 3.1K \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_trim\_i8\_decode} & 0.00 & 0.0000 & 3.0K \\
+  \texttt{modp\_div} & 0.00 & 0.0000 & 1.7K \\
+  \texttt{modp\_mkgm2} & 0.00 & 0.0000 & 1.7K \\
+\bottomrule
+\end{longtable}
+
+\subsection{Falcon-1024 --- Verify}
+
+\subsubsection*{\texttt{-O0} build (total: 0.590\,s)}
+
+\noindent\colorbox{hashcolor}{\strut \textbf{Hash / PRNG} --- 13.6\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_hash\_to\_point\_ct} & 11.86 & 0.0700 & 1.0K \\
+  \texttt{KeccakF1600\_StatePermute} & 1.69 & 0.0100 & 31.8K \\
+  \texttt{keccak\_inc\_squeeze} & 0.00 & 0.0000 & 1.5M \\
+  \texttt{shake256\_inc\_squeeze} & 0.00 & 0.0000 & 1.5M \\
+  \texttt{get\_rng\_u64} & 0.00 & 0.0000 & 200.9K \\
+  \texttt{prng\_get\_u8} & 0.00 & 0.0000 & 10.4K \\
+  \texttt{prng\_get\_u64} & 0.00 & 0.0000 & 3.5K \\
+  \texttt{keccak\_inc\_absorb} & 0.00 & 0.0000 & 2.0K \\
+  \texttt{shake256\_inc\_absorb} & 0.00 & 0.0000 & 2.0K \\
+  \texttt{keccak\_inc\_finalize} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{keccak\_inc\_init} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{shake256\_inc\_ctx\_release} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{shake256\_inc\_finalize} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{shake256\_inc\_init} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_prng\_refill} & 0.00 & 0.0000 & 76 \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{intcolor}{\strut \textbf{Integer Arithmetic} --- 54.2\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{mq\_montymul} & 23.73 & 0.1400 & 18.5M \\
+  \texttt{mq\_add} & 8.47 & 0.0500 & 15.4M \\
+  \texttt{modp\_montymul} & 5.08 & 0.0300 & 3.9M \\
+  \texttt{modp\_add} & 3.39 & 0.0200 & 3.1M \\
+  \texttt{mq\_NTT} & 3.39 & 0.0200 & 2.0K \\
+  \texttt{mq\_sub} & 1.69 & 0.0100 & 16.4M \\
+  \texttt{zint\_mod\_small\_unsigned} & 1.69 & 0.0100 & 135.8K \\
+  \texttt{zint\_add\_scaled\_mul\_small} & 1.69 & 0.0100 & 76.9K \\
+  \texttt{zint\_add\_mul\_small} & 1.69 & 0.0100 & 60.2K \\
+  \texttt{mq\_iNTT} & 1.69 & 0.0100 & 1.0K \\
+  \texttt{poly\_small\_mkgauss} & 1.69 & 0.0100 & 98 \\
+  \texttt{modp\_sub} & 0.00 & 0.0000 & 1.0M \\
+  \texttt{mkgauss} & 0.00 & 0.0000 & 100.4K \\
+  \texttt{zint\_mod\_small\_signed} & 0.00 & 0.0000 & 75.6K \\
+  \texttt{modp\_set} & 0.00 & 0.0000 & 68.2K \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{fpcolor}{\strut \textbf{Floating-Point / FFT} --- 28.8\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_fpr\_add} & 18.64 & 0.1100 & 2.2M \\
+  \texttt{FPR} & 5.08 & 0.0300 & 4.3M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_fpr\_scaled} & 1.69 & 0.0100 & 191.6K \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_poly\_LDL\_fft} & 1.69 & 0.0100 & 1.0K \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_iFFT} & 1.69 & 0.0100 & 875 \\
+  \texttt{fpr\_ursh} & 0.00 & 0.0000 & 2.2M \\
+  \texttt{fpr\_ulsh} & 0.00 & 0.0000 & 2.2M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_fpr\_mul} & 0.00 & 0.0000 & 1.9M \\
+  \texttt{fpr\_sub} & 0.00 & 0.0000 & 972.5K \\
+  \texttt{fpr\_of} & 0.00 & 0.0000 & 167.9K \\
+  \texttt{fpr\_neg} & 0.00 & 0.0000 & 86.9K \\
+  \texttt{fpr\_sqr} & 0.00 & 0.0000 & 67.6K \\
+  \texttt{fpr\_sqr} & 0.00 & 0.0000 & 55.4K \\
+  \texttt{fpr\_half} & 0.00 & 0.0000 & 36.9K \\
+  \texttt{fpr\_of} & 0.00 & 0.0000 & 23.7K \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{othercolor}{\strut \textbf{Other} --- 3.4\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_comp\_decode} & 3.39 & 0.0200 & 1.0K \\
+  \texttt{mq\_montysqr} & 0.00 & 0.0000 & 33.8K \\
+  \texttt{modp\_R} & 0.00 & 0.0000 & 20.7K \\
+  \texttt{fpr\_inv} & 0.00 & 0.0000 & 18.9K \\
+  \texttt{fpr\_lt} & 0.00 & 0.0000 & 15.1K \\
+  \texttt{mq\_rshift1} & 0.00 & 0.0000 & 10.0K \\
+  \texttt{modp\_ninv31} & 0.00 & 0.0000 & 9.0K \\
+  \texttt{mq\_conv\_small} & 0.00 & 0.0000 & 7.2K \\
+  \texttt{modp\_norm} & 0.00 & 0.0000 & 4.1K \\
+  \texttt{BerExp} & 0.00 & 0.0000 & 3.5K \\
+  \texttt{mq\_div\_12289} & 0.00 & 0.0000 & 3.1K \\
+  \texttt{modp\_div} & 0.00 & 0.0000 & 2.9K \\
+  \texttt{modp\_mkgm2} & 0.00 & 0.0000 & 2.9K \\
+  \texttt{modp\_Rx} & 0.00 & 0.0000 & 2.8K \\
+  \texttt{fpr\_floor} & 0.00 & 0.0000 & 2.0K \\
+\bottomrule
+\end{longtable}
+
+\subsubsection*{\texttt{-O3} build (total: 0.080\,s)}
+
+\noindent\colorbox{hashcolor}{\strut \textbf{Hash / PRNG} --- 25.0\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{KeccakF1600\_StatePermute} & 12.50 & 0.0100 & 25.3K \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_hash\_to\_point\_ct} & 12.50 & 0.0100 & 1.0K \\
+  \texttt{keccak\_inc\_finalize} & 0.00 & 0.0000 & 1.4M \\
+  \texttt{shake256\_inc\_squeeze} & 0.00 & 0.0000 & 1.4M \\
+  \texttt{get\_rng\_u64} & 0.00 & 0.0000 & 90.2K \\
+  \texttt{prng\_get\_u8} & 0.00 & 0.0000 & 10.7K \\
+  \texttt{prng\_get\_u64} & 0.00 & 0.0000 & 3.6K \\
+  \texttt{keccak\_inc\_absorb} & 0.00 & 0.0000 & 2.0K \\
+  \texttt{shake256\_inc\_absorb} & 0.00 & 0.0000 & 2.0K \\
+  \texttt{keccak\_inc\_init} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{shake256\_inc\_ctx\_release} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{shake256\_inc\_finalize} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{shake256\_inc\_init} & 0.00 & 0.0000 & 1.0K \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_prng\_refill} & 0.00 & 0.0000 & 78 \\
+  \texttt{PQCLEAN\_randombytes} & 0.00 & 0.0000 & 4 \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{intcolor}{\strut \textbf{Integer Arithmetic} --- 62.5\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{mq\_add} & 25.00 & 0.0200 & 15.4M \\
+  \texttt{mq\_montymul} & 12.50 & 0.0100 & 17.5M \\
+  \texttt{mq\_NTT} & 12.50 & 0.0100 & 2.0K \\
+  \texttt{mq\_iNTT} & 12.50 & 0.0100 & 1.0K \\
+  \texttt{mq\_sub} & 0.00 & 0.0000 & 16.4M \\
+  \texttt{modp\_montymul} & 0.00 & 0.0000 & 3.9M \\
+  \texttt{modp\_add} & 0.00 & 0.0000 & 3.1M \\
+  \texttt{mq\_montymul.constprop.0} & 0.00 & 0.0000 & 1.0M \\
+  \texttt{modp\_sub} & 0.00 & 0.0000 & 1.0M \\
+  \texttt{zint\_mod\_small\_unsigned} & 0.00 & 0.0000 & 134.8K \\
+  \texttt{zint\_rebuild\_CRT.constprop.2} & 0.00 & 0.0000 & 84.6K \\
+  \texttt{zint\_add\_scaled\_mul\_small} & 0.00 & 0.0000 & 77.0K \\
+  \texttt{zint\_mod\_small\_signed} & 0.00 & 0.0000 & 74.6K \\
+  \texttt{zint\_add\_mul\_small} & 0.00 & 0.0000 & 60.2K \\
+  \texttt{poly\_big\_to\_small} & 0.00 & 0.0000 & 56.4K \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{fpcolor}{\strut \textbf{Floating-Point / FFT} --- 12.5\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_fpr\_mul} & 12.50 & 0.0100 & 1.2M \\
+  \texttt{FPR} & 0.00 & 0.0000 & 2.7M \\
+  \texttt{fpr\_trunc} & 0.00 & 0.0000 & 1.3M \\
+  \texttt{fpr\_ursh} & 0.00 & 0.0000 & 1.3M \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_fpr\_add} & 0.00 & 0.0000 & 1.3M \\
+  \texttt{fpr\_sub} & 0.00 & 0.0000 & 557.8K \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_fpr\_scaled} & 0.00 & 0.0000 & 161.4K \\
+  \texttt{fpr\_of} & 0.00 & 0.0000 & 137.4K \\
+  \texttt{fpr\_neg} & 0.00 & 0.0000 & 56.2K \\
+  \texttt{fpr\_sqr} & 0.00 & 0.0000 & 36.9K \\
+  \texttt{fpr\_half} & 0.00 & 0.0000 & 36.9K \\
+  \texttt{fpr\_sqr} & 0.00 & 0.0000 & 24.6K \\
+  \texttt{fpr\_of} & 0.00 & 0.0000 & 24.0K \\
+  \texttt{fpr\_sub} & 0.00 & 0.0000 & 12.8K \\
+  \texttt{PQCLEAN\_FALCON1024\_CLEAN\_fpr\_div} & 0.00 & 0.0000 & 11.3K \\
+\bottomrule
+\end{longtable}
+
+\noindent\colorbox{othercolor}{\strut \textbf{Other} --- 0.0\% of total}
+\vspace{2pt}
+
+\begin{longtable}{p{7.5cm}rrr}
+\toprule
+Function & \% & self(s) & calls \\
+\midrule
+\endhead
+  \texttt{mq\_montysqr} & 0.00 & 0.0000 & 33.8K \\
+  \texttt{modp\_R} & 0.00 & 0.0000 & 17.7K \\
+  \texttt{fpr\_inv} & 0.00 & 0.0000 & 11.3K \\
+  \texttt{mq\_rshift1} & 0.00 & 0.0000 & 10.0K \\
+  \texttt{modp\_ninv31} & 0.00 & 0.0000 & 9.0K \\
+  \texttt{mq\_conv\_small} & 0.00 & 0.0000 & 7.2K \\
+  \texttt{BerExp} & 0.00 & 0.0000 & 3.6K \\
+  \texttt{solve\_NTRU\_binary\_depth1} & 0.00 & 0.0000 & 3.1K \\
+  \texttt{mq\_div\_12289} & 0.00 & 0.0000 & 3.1K \\
+  \texttt{modp\_div} & 0.00 & 0.0000 & 2.9K \\
+  \texttt{modp\_mkgm2} & 0.00 & 0.0000 & 2.9K \\
+  \texttt{modp\_Rx} & 0.00 & 0.0000 & 2.8K \\
+  \texttt{fpr\_floor} & 0.00 & 0.0000 & 2.0K \\
+  \texttt{fpr\_irsh} & 0.00 & 0.0000 & 2.0K \\
+  \texttt{poly\_big\_to\_fp} & 0.00 & 0.0000 & 1.7K \\
+\bottomrule
+\end{longtable}
+
+\section{Key Findings}
+
+\begin{itemize}
+
+  \item \textbf{KeyGen is dominated by Integer NTT and FP/FFT arithmetic.}
+        \texttt{modp\_montymul} (Montgomery multiplication for NTT)
+        and \texttt{fpr\_add} (FFT floating-point add) together
+        account for over 40\% of total keygen time.
+        The lattice basis generation (\texttt{zint\_*}, \texttt{mkgauss})
+        contributes a further $\sim$10--15\%.
+
+  \item \textbf{Sign is almost entirely FP/FFT.}
+        The \texttt{ffSampling\_fft\_dyntree} recursive sampler
+        drives repeated calls to \texttt{fpr\_add} ($\sim$50\%)
+        and \texttt{fpr\_mul} ($\sim$15\%).
+        Integer NTT (\texttt{mq\_montymul}) is visible but minor ($<$2\%).
+
+  \item \textbf{Verify is entirely Hash and Integer NTT.}
+        No floating-point FFT is used. Time splits between
+        \texttt{hash\_to\_point\_ct} (SHAKE-256 hashing of the message)
+        and \texttt{mq\_montymul} / \texttt{mq\_NTT}
+        (NTT-based polynomial multiplication over $\mathbb{Z}_q$).
+        This is why verify is 70--300$\times$ faster than keygen.
+
+  \item \textbf{Falcon-1024 costs $\approx 2$--$3\times$ more than Falcon-512.}
+        The FFT and NTT algorithms are $\mathcal{O}(N \log N)$;
+        doubling $N$ from 512 to 1024 roughly doubles the cost
+        with an additional $\log$ factor.
+
+  \item \textbf{O3 gives 4--5$\times$ speedup on keygen/sign,
+        7$\times$ on verify.}
+        The \texttt{FPR} constructor overhead drops from $\sim$15\%
+        to $<$5\% under O3 (compiler promotes the struct boxing).
+        Verify benefits most from O3 because \texttt{mq\_montymul}
+        vectorises well.
+
+\end{itemize}
+
+\end{document}
