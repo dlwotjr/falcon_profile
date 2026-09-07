@@ -3,157 +3,34 @@ Flat profile:
 Each sample counts as 0.01 seconds.
   %   cumulative   self              self     total           
  time   seconds   seconds    calls  ms/call  ms/call  name    
- 42.11      0.08     0.08  8486656     0.00     0.00  mq_montymul
- 15.79      0.11     0.03  7440128     0.00     0.00  mq_sub
- 15.79      0.14     0.03   926960     0.00     0.00  FPR
- 10.53      0.16     0.02  6928128     0.00     0.00  mq_add
-  5.26      0.17     0.01   683552     0.00     0.00  modp_add
-  5.26      0.18     0.01   432868     0.00     0.00  PQCLEAN_FALCON512_CLEAN_fpr_add
-  5.26      0.19     0.01     1002     0.01     0.05  mq_iNTT
-  0.00      0.19     0.00   975905     0.00     0.00  modp_montymul
-  0.00      0.19     0.00   758730     0.00     0.00  keccak_inc_squeeze
-  0.00      0.19     0.00   758730     0.00     0.00  shake256_inc_squeeze
-  0.00      0.19     0.00   436330     0.00     0.00  fpr_ursh
-  0.00      0.19     0.00   432868     0.00     0.00  fpr_ulsh
-  0.00      0.19     0.00   425108     0.00     0.00  PQCLEAN_FALCON512_CLEAN_fpr_mul
-  0.00      0.19     0.00   367276     0.00     0.00  modp_sub
-  0.00      0.19     0.00   183400     0.00     0.00  fpr_sub
-  0.00      0.19     0.00    64377     0.00     0.00  PQCLEAN_FALCON512_CLEAN_fpr_scaled
-  0.00      0.19     0.00    52528     0.00     0.00  fpr_of
-  0.00      0.19     0.00    49832     0.00     0.00  zint_mod_small_unsigned
-  0.00      0.19     0.00    41012     0.00     0.00  get_rng_u64
-  0.00      0.19     0.00    30014     0.00     0.00  modp_set
-  0.00      0.19     0.00    28222     0.00     0.00  zint_mod_small_signed
-  0.00      0.19     0.00    21610     0.00     0.00  zint_add_mul_small
-  0.00      0.19     0.00    21534     0.00     0.00  fpr_neg
-  0.00      0.19     0.00    21052     0.00     0.00  zint_norm_zero
-  0.00      0.19     0.00    21052     0.00     0.00  zint_sub
-  0.00      0.19     0.00    18104     0.00     0.00  zint_add_scaled_mul_small
-  0.00      0.19     0.00    16384     0.00     0.00  fpr_half
-  0.00      0.19     0.00    13425     0.00     0.00  KeccakF1600_StatePermute
-  0.00      0.19     0.00    12796     0.00     0.00  fpr_sqr
-  0.00      0.19     0.00    11849     0.00     0.00  fpr_of
-  0.00      0.19     0.00    11264     0.00     0.00  mq_montysqr
-  0.00      0.19     0.00    10253     0.00     0.00  mkgauss
-  0.00      0.19     0.00     9018     0.00     0.00  mq_rshift1
-  0.00      0.19     0.00     6740     0.00     0.00  modp_R
-  0.00      0.19     0.00     6733     0.00     0.00  fpr_sqr
-  0.00      0.19     0.00     6465     0.00     0.00  fpr_lt
-  0.00      0.19     0.00     6217     0.00     0.00  fpr_sub
-  0.00      0.19     0.00     5199     0.00     0.00  prng_get_u8
-  0.00      0.19     0.00     4254     0.00     0.00  fpr_rint
-  0.00      0.19     0.00     4254     0.00     0.00  fpr_ulsh
-  0.00      0.19     0.00     4254     0.00     0.00  fpr_ursh
-  0.00      0.19     0.00     4095     0.00     0.00  PQCLEAN_FALCON512_CLEAN_fpr_div
-  0.00      0.19     0.00     4095     0.00     0.00  fpr_inv
-  0.00      0.19     0.00     3794     0.00     0.00  modp_R2
-  0.00      0.19     0.00     3648     0.00     0.00  zint_sub_scaled
-  0.00      0.19     0.00     3462     0.00     0.00  fpr_trunc
-  0.00      0.19     0.00     2804     0.00     0.00  modp_ninv31
-  0.00      0.19     0.00     2755     0.00     0.00  fpr_sqr
-  0.00      0.19     0.00     2755     0.00     0.00  fpr_ursh
-  0.00      0.19     0.00     2560     0.00     0.00  mq_conv_small
-  0.00      0.19     0.00     2048     0.00     0.00  modp_norm
-  0.00      0.19     0.00     2044     0.00     0.00  PQCLEAN_FALCON512_CLEAN_poly_split_fft
-  0.00      0.19     0.00     2005     0.00     0.04  mq_NTT
-  0.00      0.19     0.00     2004     0.00     0.00  keccak_inc_absorb
-  0.00      0.19     0.00     2004     0.00     0.00  shake256_inc_absorb
-  0.00      0.19     0.00     1957     0.00     0.00  modp_NTT2_ext
-  0.00      0.19     0.00     1764     0.00     0.00  modp_iNTT2_ext
-  0.00      0.19     0.00     1731     0.00     0.00  BerExp
-  0.00      0.19     0.00     1731     0.00     0.00  PQCLEAN_FALCON512_CLEAN_fpr_expm_p63
-  0.00      0.19     0.00     1731     0.00     0.00  PQCLEAN_FALCON512_CLEAN_gaussian0_sampler
-  0.00      0.19     0.00     1731     0.00     0.00  fpr_trunc
-  0.00      0.19     0.00     1731     0.00     0.00  prng_get_u64
-  0.00      0.19     0.00     1536     0.00     0.00  zint_one_to_plain
-  0.00      0.19     0.00     1492     0.00     0.00  zint_mul_small
-  0.00      0.19     0.00     1093     0.00     0.00  PQCLEAN_FALCON512_CLEAN_poly_mul_fft
-  0.00      0.19     0.00     1024     0.00     0.00  PQCLEAN_FALCON512_CLEAN_sampler
-  0.00      0.19     0.00     1024     0.00     0.00  fpr_floor
-  0.00      0.19     0.00     1024     0.00     0.00  fpr_half
-  0.00      0.19     0.00     1024     0.00     0.00  fpr_irsh
-  0.00      0.19     0.00     1024     0.00     0.00  fpr_rint
-  0.00      0.19     0.00     1024     0.00     0.00  fpr_ulsh
-  0.00      0.19     0.00     1024     0.00     0.00  mq_div_12289
-  0.00      0.19     0.00     1022     0.00     0.00  PQCLEAN_FALCON512_CLEAN_poly_merge_fft
-  0.00      0.19     0.00     1003     0.00     0.00  keccak_inc_finalize
-  0.00      0.19     0.00     1003     0.00     0.00  keccak_inc_init
-  0.00      0.19     0.00     1003     0.00     0.00  shake256_inc_ctx_release
-  0.00      0.19     0.00     1003     0.00     0.00  shake256_inc_finalize
-  0.00      0.19     0.00     1003     0.00     0.00  shake256_inc_init
-  0.00      0.19     0.00     1001     0.00     0.00  PQCLEAN_FALCON512_CLEAN_hash_to_point_ct
-  0.00      0.19     0.00     1001     0.00     0.00  mq_poly_montymul_ntt
-  0.00      0.19     0.00     1001     0.00     0.00  mq_poly_tomonty
-  0.00      0.19     0.00     1000     0.00     0.00  PQCLEAN_FALCON512_CLEAN_comp_decode
-  0.00      0.19     0.00     1000     0.00     0.14  PQCLEAN_FALCON512_CLEAN_crypto_sign_verify
-  0.00      0.19     0.00     1000     0.00     0.00  PQCLEAN_FALCON512_CLEAN_is_short
-  0.00      0.19     0.00     1000     0.00     0.00  PQCLEAN_FALCON512_CLEAN_modq_decode
-  0.00      0.19     0.00     1000     0.00     0.04  PQCLEAN_FALCON512_CLEAN_to_ntt_monty
-  0.00      0.19     0.00     1000     0.00     0.10  PQCLEAN_FALCON512_CLEAN_verify_raw
-  0.00      0.19     0.00     1000     0.00     0.14  do_verify
-  0.00      0.19     0.00     1000     0.00     0.00  mq_poly_sub
-  0.00      0.19     0.00      993     0.00     0.00  modp_div
-  0.00      0.19     0.00      993     0.00     0.00  modp_mkgm2
-  0.00      0.19     0.00      960     0.00     0.00  modp_Rx
-  0.00      0.19     0.00      880     0.00     0.00  zint_finish_mod
-  0.00      0.19     0.00      803     0.00     0.00  PQCLEAN_FALCON512_CLEAN_poly_add
-  0.00      0.19     0.00      614     0.00     0.02  PQCLEAN_FALCON512_CLEAN_FFT
-  0.00      0.19     0.00      592     0.00     0.01  poly_big_to_fp
-  0.00      0.19     0.00      518     0.00     0.00  poly_sub_scaled
-  0.00      0.19     0.00      513     0.00     0.00  PQCLEAN_FALCON512_CLEAN_poly_sub
-  0.00      0.19     0.00      512     0.00     0.00  PQCLEAN_FALCON512_CLEAN_fpr_sqrt
-  0.00      0.19     0.00      511     0.00     0.00  PQCLEAN_FALCON512_CLEAN_poly_LDL_fft
-  0.00      0.19     0.00      440     0.00     0.00  zint_co_reduce_mod
-  0.00      0.19     0.00      440     0.00     0.00  zint_negate
-  0.00      0.19     0.00      303     0.00     0.03  PQCLEAN_FALCON512_CLEAN_iFFT
-  0.00      0.19     0.00      298     0.00     0.00  PQCLEAN_FALCON512_CLEAN_poly_mul_autoadj_fft
-  0.00      0.19     0.00      220     0.00     0.00  zint_co_reduce
-  0.00      0.19     0.00      175     0.00     0.01  zint_rebuild_CRT
-  0.00      0.19     0.00       56     0.00     0.05  poly_sub_scaled_ntt
-  0.00      0.19     0.00       44     0.00     0.08  make_fg_step
-  0.00      0.19     0.00       38     0.00     0.00  PQCLEAN_FALCON512_CLEAN_prng_refill
-  0.00      0.19     0.00       24     0.00     0.00  PQCLEAN_FALCON512_CLEAN_poly_adj_fft
-  0.00      0.19     0.00       20     0.00     0.00  poly_small_mkgauss
-  0.00      0.19     0.00       20     0.00     0.00  poly_small_sqnorm
-  0.00      0.19     0.00       19     0.00     0.00  align_fpr
-  0.00      0.19     0.00       13     0.00     0.04  PQCLEAN_FALCON512_CLEAN_poly_invnorm2_fft
-  0.00      0.19     0.00       12     0.00     0.02  PQCLEAN_FALCON512_CLEAN_poly_mulconst
-  0.00      0.19     0.00       10     0.00     0.02  poly_small_to_fp
-  0.00      0.19     0.00        8     0.00     0.43  make_fg
-  0.00      0.19     0.00        8     0.00     0.02  smallints_to_fpr
-  0.00      0.19     0.00        7     0.00     0.00  align_u32
-  0.00      0.19     0.00        7     0.00     5.64  solve_NTRU_intermediate
-  0.00      0.19     0.00        4     0.00     0.03  PQCLEAN_FALCON512_CLEAN_poly_mulselfadj_fft
-  0.00      0.19     0.00        4     0.00     0.00  PQCLEAN_FALCON512_CLEAN_poly_neg
-  0.00      0.19     0.00        4     0.00     0.00  PQCLEAN_randombytes
-  0.00      0.19     0.00        4     0.00     0.00  modp_poly_rec_res
-  0.00      0.19     0.00        4     0.00     0.00  randombytes_linux_randombytes_getrandom
-  0.00      0.19     0.00        3     0.00     0.00  PQCLEAN_FALCON512_CLEAN_trim_i8_decode
-  0.00      0.19     0.00        3     0.00     0.00  PQCLEAN_FALCON512_CLEAN_trim_i8_encode
-  0.00      0.19     0.00        2     0.00     0.06  PQCLEAN_FALCON512_CLEAN_poly_muladj_fft
-  0.00      0.19     0.00        2     0.00     0.00  poly_big_to_small
-  0.00      0.19     0.00        1     0.00     0.00  PQCLEAN_FALCON512_CLEAN_comp_encode
-  0.00      0.19     0.00        1     0.00     0.27  PQCLEAN_FALCON512_CLEAN_complete_private
-  0.00      0.19     0.00        1     0.00     0.22  PQCLEAN_FALCON512_CLEAN_compute_public
-  0.00      0.19     0.00        1     0.00    42.31  PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair
-  0.00      0.19     0.00        1     0.00     8.18  PQCLEAN_FALCON512_CLEAN_crypto_sign_signature
-  0.00      0.19     0.00        1     0.00     0.00  PQCLEAN_FALCON512_CLEAN_is_short_half
-  0.00      0.19     0.00        1     0.00    42.31  PQCLEAN_FALCON512_CLEAN_keygen
-  0.00      0.19     0.00        1     0.00     0.00  PQCLEAN_FALCON512_CLEAN_modq_encode
-  0.00      0.19     0.00        1     0.00     0.08  PQCLEAN_FALCON512_CLEAN_poly_add_muladj_fft
-  0.00      0.19     0.00        1     0.00     0.02  PQCLEAN_FALCON512_CLEAN_poly_div_autoadj_fft
-  0.00      0.19     0.00        1     0.00     0.00  PQCLEAN_FALCON512_CLEAN_prng_init
-  0.00      0.19     0.00        1     0.00     7.91  PQCLEAN_FALCON512_CLEAN_sign_dyn
-  0.00      0.19     0.00        1     0.00     8.18  do_sign
-  0.00      0.19     0.00        1     0.00     7.91  do_sign_dyn
-  0.00      0.19     0.00        1     0.00     7.21  ffSampling_fft_dyntree
-  0.00      0.19     0.00        1     0.00     0.00  fpr_neg
-  0.00      0.19     0.00        1     0.00   190.00  run_falcon512_verify
-  0.00      0.19     0.00        1     0.00    40.60  solve_NTRU
-  0.00      0.19     0.00        1     0.00     0.17  solve_NTRU_binary_depth0
-  0.00      0.19     0.00        1     0.00     0.47  solve_NTRU_binary_depth1
-  0.00      0.19     0.00        1     0.00     0.44  solve_NTRU_deepest
-  0.00      0.19     0.00        1     0.00     0.00  zint_bezout
+ 64.71      0.11     0.11  8448000     0.00     0.00  mq_montymul
+ 11.76      0.13     0.02  6912000     0.00     0.00  mq_add
+ 11.76      0.15     0.02     1000     0.02     0.03  PQCLEAN_FALCON512_CLEAN_hash_to_point_ct
+  5.88      0.16     0.01    11000     0.00     0.00  KeccakF1600_StatePermute
+  5.88      0.17     0.01     2000     0.01     0.04  mq_NTT
+  0.00      0.17     0.00  7424000     0.00     0.00  mq_sub
+  0.00      0.17     0.00   717000     0.00     0.00  keccak_inc_squeeze
+  0.00      0.17     0.00   717000     0.00     0.00  shake256_inc_squeeze
+  0.00      0.17     0.00     9000     0.00     0.00  mq_rshift1
+  0.00      0.17     0.00     2000     0.00     0.00  keccak_inc_absorb
+  0.00      0.17     0.00     2000     0.00     0.00  shake256_inc_absorb
+  0.00      0.17     0.00     1000     0.00     0.00  PQCLEAN_FALCON512_CLEAN_comp_decode
+  0.00      0.17     0.00     1000     0.00     0.17  PQCLEAN_FALCON512_CLEAN_crypto_sign_verify
+  0.00      0.17     0.00     1000     0.00     0.00  PQCLEAN_FALCON512_CLEAN_is_short
+  0.00      0.17     0.00     1000     0.00     0.00  PQCLEAN_FALCON512_CLEAN_modq_decode
+  0.00      0.17     0.00     1000     0.00     0.05  PQCLEAN_FALCON512_CLEAN_to_ntt_monty
+  0.00      0.17     0.00     1000     0.00     0.09  PQCLEAN_FALCON512_CLEAN_verify_raw
+  0.00      0.17     0.00     1000     0.00     0.17  do_verify
+  0.00      0.17     0.00     1000     0.00     0.00  keccak_inc_finalize
+  0.00      0.17     0.00     1000     0.00     0.00  keccak_inc_init
+  0.00      0.17     0.00     1000     0.00     0.04  mq_iNTT
+  0.00      0.17     0.00     1000     0.00     0.01  mq_poly_montymul_ntt
+  0.00      0.17     0.00     1000     0.00     0.00  mq_poly_sub
+  0.00      0.17     0.00     1000     0.00     0.01  mq_poly_tomonty
+  0.00      0.17     0.00     1000     0.00     0.00  shake256_inc_ctx_release
+  0.00      0.17     0.00     1000     0.00     0.00  shake256_inc_finalize
+  0.00      0.17     0.00     1000     0.00     0.00  shake256_inc_init
+  0.00      0.17     0.00        1     0.00   170.00  run_falcon512_verify
 
  %         the percentage of the total running time of the
 time       program used by this function.
@@ -191,1011 +68,137 @@ notice and this notice are preserved.
 		     Call graph (explanation follows)
 
 
-granularity: each sample hit covers 4 byte(s) for 5.26% of 0.19 seconds
+granularity: each sample hit covers 4 byte(s) for 5.88% of 0.17 seconds
 
 index % time    self  children    called     name
-                0.00    0.19       1/1           main [2]
-[1]    100.0    0.00    0.19       1         run_falcon512_verify [1]
-                0.00    0.14    1000/1000        PQCLEAN_FALCON512_CLEAN_crypto_sign_verify [3]
-                0.00    0.04       1/1           PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair [10]
-                0.00    0.01       1/1           PQCLEAN_FALCON512_CLEAN_crypto_sign_signature [23]
-                0.00    0.00       1/4           PQCLEAN_randombytes [141]
+                0.00    0.17    1000/1000        run_falcon512_verify [3]
+[1]    100.0    0.00    0.17    1000         PQCLEAN_FALCON512_CLEAN_crypto_sign_verify [1]
+                0.00    0.17    1000/1000        do_verify [2]
+-----------------------------------------------
+                0.00    0.17    1000/1000        PQCLEAN_FALCON512_CLEAN_crypto_sign_verify [1]
+[2]    100.0    0.00    0.17    1000         do_verify [2]
+                0.00    0.09    1000/1000        PQCLEAN_FALCON512_CLEAN_verify_raw [6]
+                0.00    0.05    1000/1000        PQCLEAN_FALCON512_CLEAN_to_ntt_monty [8]
+                0.02    0.01    1000/1000        PQCLEAN_FALCON512_CLEAN_hash_to_point_ct [10]
+                0.00    0.00    2000/2000        shake256_inc_absorb [20]
+                0.00    0.00    1000/1000        PQCLEAN_FALCON512_CLEAN_modq_decode [23]
+                0.00    0.00    1000/1000        PQCLEAN_FALCON512_CLEAN_comp_decode [21]
+                0.00    0.00    1000/1000        shake256_inc_init [29]
+                0.00    0.00    1000/1000        shake256_inc_finalize [28]
+                0.00    0.00    1000/1000        shake256_inc_ctx_release [27]
+-----------------------------------------------
+                0.00    0.17       1/1           main [4]
+[3]    100.0    0.00    0.17       1         run_falcon512_verify [3]
+                0.00    0.17    1000/1000        PQCLEAN_FALCON512_CLEAN_crypto_sign_verify [1]
 -----------------------------------------------
                                                  <spontaneous>
-[2]    100.0    0.00    0.19                 main [2]
-                0.00    0.19       1/1           run_falcon512_verify [1]
------------------------------------------------
-                0.00    0.14    1000/1000        run_falcon512_verify [1]
-[3]     73.4    0.00    0.14    1000         PQCLEAN_FALCON512_CLEAN_crypto_sign_verify [3]
-                0.00    0.14    1000/1000        do_verify [4]
------------------------------------------------
-                0.00    0.14    1000/1000        PQCLEAN_FALCON512_CLEAN_crypto_sign_verify [3]
-[4]     73.4    0.00    0.14    1000         do_verify [4]
-                0.00    0.10    1000/1000        PQCLEAN_FALCON512_CLEAN_verify_raw [5]
-                0.00    0.04    1000/1000        PQCLEAN_FALCON512_CLEAN_to_ntt_monty [9]
-                0.00    0.00    2000/2004        shake256_inc_absorb [107]
-                0.00    0.00    1000/1000        PQCLEAN_FALCON512_CLEAN_modq_decode [126]
-                0.00    0.00    1000/1000        PQCLEAN_FALCON512_CLEAN_comp_decode [124]
-                0.00    0.00    1000/1003        shake256_inc_init [122]
-                0.00    0.00    1000/1003        shake256_inc_finalize [121]
-                0.00    0.00    1000/1001        PQCLEAN_FALCON512_CLEAN_hash_to_point_ct [123]
-                0.00    0.00    1000/1003        shake256_inc_ctx_release [120]
------------------------------------------------
-                0.00    0.10    1000/1000        do_verify [4]
-[5]     51.1    0.00    0.10    1000         PQCLEAN_FALCON512_CLEAN_verify_raw [5]
-                0.01    0.04    1000/1002        mq_iNTT [8]
-                0.00    0.04    1000/2005        mq_NTT [7]
-                0.00    0.00    1000/1001        mq_poly_montymul_ntt [30]
-                0.00    0.00    1000/1000        mq_poly_sub [39]
-                0.00    0.00    1000/1000        PQCLEAN_FALCON512_CLEAN_is_short [125]
------------------------------------------------
-                0.00    0.00    9216/8486656     mq_div_12289 [61]
-                0.00    0.00   11264/8486656     mq_montysqr [70]
-                0.00    0.00  512512/8486656     mq_poly_tomonty [31]
-                0.00    0.00  512512/8486656     mq_poly_montymul_ntt [30]
-                0.03    0.00 2821632/8486656     mq_iNTT [8]
-                0.04    0.00 4619520/8486656     mq_NTT [7]
-[6]     42.1    0.08    0.00 8486656         mq_montymul [6]
------------------------------------------------
-                0.00    0.00       2/2005        PQCLEAN_FALCON512_CLEAN_compute_public [58]
-                0.00    0.00       3/2005        PQCLEAN_FALCON512_CLEAN_complete_private [56]
-                0.00    0.04    1000/2005        PQCLEAN_FALCON512_CLEAN_to_ntt_monty [9]
-                0.00    0.04    1000/2005        PQCLEAN_FALCON512_CLEAN_verify_raw [5]
-[7]     39.7    0.00    0.08    2005         mq_NTT [7]
-                0.04    0.00 4619520/8486656     mq_montymul [6]
-                0.02    0.00 4619520/7440128     mq_sub [14]
-                0.01    0.00 4619520/6928128     mq_add [17]
------------------------------------------------
-                0.00    0.00       1/1002        PQCLEAN_FALCON512_CLEAN_compute_public [58]
-                0.00    0.00       1/1002        PQCLEAN_FALCON512_CLEAN_complete_private [56]
-                0.01    0.04    1000/1002        PQCLEAN_FALCON512_CLEAN_verify_raw [5]
-[8]     27.7    0.01    0.04    1002         mq_iNTT [8]
-                0.03    0.00 2821632/8486656     mq_montymul [6]
-                0.01    0.00 2308608/7440128     mq_sub [14]
-                0.01    0.00 2308608/6928128     mq_add [17]
-                0.00    0.00    9018/9018        mq_rshift1 [93]
------------------------------------------------
-                0.00    0.04    1000/1000        do_verify [4]
-[9]     22.4    0.00    0.04    1000         PQCLEAN_FALCON512_CLEAN_to_ntt_monty [9]
-                0.00    0.04    1000/2005        mq_NTT [7]
-                0.00    0.00    1000/1001        mq_poly_tomonty [31]
------------------------------------------------
-                0.00    0.04       1/1           run_falcon512_verify [1]
-[10]    22.3    0.00    0.04       1         PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair [10]
-                0.00    0.04       1/1           PQCLEAN_FALCON512_CLEAN_keygen [11]
-                0.00    0.00       3/3           PQCLEAN_FALCON512_CLEAN_trim_i8_encode [145]
-                0.00    0.00       1/4           PQCLEAN_randombytes [141]
-                0.00    0.00       1/1003        shake256_inc_init [122]
-                0.00    0.00       1/2004        shake256_inc_absorb [107]
-                0.00    0.00       1/1003        shake256_inc_finalize [121]
-                0.00    0.00       1/1003        shake256_inc_ctx_release [120]
-                0.00    0.00       1/1           PQCLEAN_FALCON512_CLEAN_modq_encode [149]
------------------------------------------------
-                0.00    0.04       1/1           PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair [10]
-[11]    22.3    0.00    0.04       1         PQCLEAN_FALCON512_CLEAN_keygen [11]
-                0.00    0.04       1/1           solve_NTRU [12]
-                0.00    0.00    5120/432868      PQCLEAN_FALCON512_CLEAN_fpr_add [16]
-                0.00    0.00      10/303         PQCLEAN_FALCON512_CLEAN_iFFT [22]
-                0.00    0.00      10/614         PQCLEAN_FALCON512_CLEAN_FFT [18]
-                0.00    0.00       1/1           PQCLEAN_FALCON512_CLEAN_compute_public [58]
-                0.00    0.00       5/13          PQCLEAN_FALCON512_CLEAN_poly_invnorm2_fft [48]
-                0.00    0.00    5120/6733        fpr_sqr [59]
-                0.00    0.00      10/10          poly_small_to_fp [63]
-                0.00    0.00      10/12          PQCLEAN_FALCON512_CLEAN_poly_mulconst [60]
-                0.00    0.00      10/298         PQCLEAN_FALCON512_CLEAN_poly_mul_autoadj_fft [57]
-                0.00    0.00      20/20          poly_small_mkgauss [136]
-                0.00    0.00      20/20          poly_small_sqnorm [137]
-                0.00    0.00      10/24          PQCLEAN_FALCON512_CLEAN_poly_adj_fft [135]
-                0.00    0.00       5/6465        fpr_lt [95]
------------------------------------------------
-                0.00    0.04       1/1           PQCLEAN_FALCON512_CLEAN_keygen [11]
-[12]    21.4    0.00    0.04       1         solve_NTRU [12]
-                0.00    0.04       7/7           solve_NTRU_intermediate [13]
-                0.00    0.00       1/1           solve_NTRU_binary_depth1 [49]
-                0.00    0.00       1/1           solve_NTRU_deepest [50]
-                0.00    0.00       1/1           solve_NTRU_binary_depth0 [62]
-                0.00    0.00       4/1957        modp_NTT2_ext [36]
-                0.00    0.00       1/993         modp_mkgm2 [76]
-                0.00    0.00    2048/30014       modp_set [84]
-                0.00    0.00    1025/975905      modp_montymul [77]
-                0.00    0.00     512/367276      modp_sub [82]
-                0.00    0.00       2/2           poly_big_to_small [146]
-                0.00    0.00       1/2804        modp_ninv31 [102]
------------------------------------------------
-                0.00    0.04       7/7           solve_NTRU [12]
-[13]    20.8    0.00    0.04       7         solve_NTRU_intermediate [13]
-                0.00    0.01     588/614         PQCLEAN_FALCON512_CLEAN_FFT [18]
-                0.00    0.01     287/303         PQCLEAN_FALCON512_CLEAN_iFFT [22]
-                0.00    0.01     588/592         poly_big_to_fp [28]
-                0.00    0.00       7/8           make_fg [33]
-                0.00    0.00      56/56          poly_sub_scaled_ntt [35]
-                0.00    0.00    1062/1957        modp_NTT2_ext [36]
-                0.00    0.00     574/1093        PQCLEAN_FALCON512_CLEAN_poly_mul_fft [43]
-                0.00    0.00     858/1764        modp_iNTT2_ext [44]
-                0.00    0.00    6362/28222       zint_mod_small_signed [34]
-                0.00    0.00      28/175         zint_rebuild_CRT [37]
-                0.00    0.00       7/13          PQCLEAN_FALCON512_CLEAN_poly_invnorm2_fft [48]
-                0.00    0.00     287/298         PQCLEAN_FALCON512_CLEAN_poly_mul_autoadj_fft [57]
-                0.00    0.00     287/803         PQCLEAN_FALCON512_CLEAN_poly_add [47]
-                0.00    0.00    3882/425108      PQCLEAN_FALCON512_CLEAN_fpr_mul [19]
-                0.00    0.00    1613/6733        fpr_sqr [59]
-                0.00    0.00     640/3794        modp_R2 [73]
-                0.00    0.00     320/993         modp_mkgm2 [76]
-                0.00    0.00    8262/975905      modp_montymul [77]
-                0.00    0.00    5948/6465        fpr_lt [95]
-                0.00    0.00    2974/4254        fpr_rint [97]
-                0.00    0.00     640/2804        modp_ninv31 [102]
-                0.00    0.00     531/960         modp_Rx [128]
-                0.00    0.00     518/518         poly_sub_scaled [130]
-                0.00    0.00      14/19          align_fpr [138]
-                0.00    0.00      14/24          PQCLEAN_FALCON512_CLEAN_poly_adj_fft [135]
-                0.00    0.00       7/7           align_u32 [139]
------------------------------------------------
-                0.00    0.00  512000/7440128     mq_poly_sub [39]
-                0.01    0.00 2308608/7440128     mq_iNTT [8]
-                0.02    0.00 4619520/7440128     mq_NTT [7]
-[14]    15.8    0.03    0.00 7440128         mq_sub [14]
------------------------------------------------
-                0.00    0.00     512/926960      PQCLEAN_FALCON512_CLEAN_fpr_sqrt [75]
-                0.00    0.00    4095/926960      PQCLEAN_FALCON512_CLEAN_fpr_div [65]
-                0.00    0.00   64377/926960      PQCLEAN_FALCON512_CLEAN_fpr_scaled [38]
-                0.01    0.00  425108/926960      PQCLEAN_FALCON512_CLEAN_fpr_mul [19]
-                0.01    0.00  432868/926960      PQCLEAN_FALCON512_CLEAN_fpr_add [16]
-[15]    15.8    0.03    0.00  926960         FPR [15]
------------------------------------------------
-                0.00    0.00     512/432868      PQCLEAN_FALCON512_CLEAN_poly_muladj_fft [68]
-                0.00    0.00     512/432868      PQCLEAN_FALCON512_CLEAN_poly_add_muladj_fft [72]
-                0.00    0.00    1024/432868      PQCLEAN_FALCON512_CLEAN_poly_mulselfadj_fft [67]
-                0.00    0.00    4605/432868      PQCLEAN_FALCON512_CLEAN_poly_invnorm2_fft [48]
-                0.00    0.00    5120/432868      PQCLEAN_FALCON512_CLEAN_keygen [11]
-                0.00    0.00    6144/432868      PQCLEAN_FALCON512_CLEAN_poly_merge_fft [46]
-                0.00    0.00    6217/432868      fpr_sub [54]
-                0.00    0.00    6912/432868      PQCLEAN_FALCON512_CLEAN_poly_LDL_fft [41]
-                0.00    0.00    7070/432868      PQCLEAN_FALCON512_CLEAN_poly_mul_fft [43]
-                0.00    0.00   10142/432868      PQCLEAN_FALCON512_CLEAN_poly_add [47]
-                0.00    0.00   12288/432868      PQCLEAN_FALCON512_CLEAN_poly_split_fft [40]
-                0.00    0.00   46128/432868      poly_big_to_fp [28]
-                0.00    0.00   52524/432868      PQCLEAN_FALCON512_CLEAN_iFFT [22]
-                0.00    0.00   90270/432868      PQCLEAN_FALCON512_CLEAN_FFT [18]
-                0.00    0.01  183400/432868      fpr_sub [20]
-[16]    12.6    0.01    0.01  432868         PQCLEAN_FALCON512_CLEAN_fpr_add [16]
-                0.01    0.00  432868/926960      FPR [15]
-                0.00    0.00  432868/432868      fpr_ulsh [81]
-                0.00    0.00  432868/436330      fpr_ursh [80]
------------------------------------------------
-                0.01    0.00 2308608/6928128     mq_iNTT [8]
-                0.01    0.00 4619520/6928128     mq_NTT [7]
-[17]    10.5    0.02    0.00 6928128         mq_add [17]
------------------------------------------------
-                0.00    0.00       2/614         solve_NTRU_binary_depth0 [62]
-                0.00    0.00       5/614         solve_NTRU_binary_depth1 [49]
-                0.00    0.00       9/614         do_sign_dyn [26]
-                0.00    0.00      10/614         PQCLEAN_FALCON512_CLEAN_keygen [11]
-                0.00    0.01     588/614         solve_NTRU_intermediate [13]
-[18]     7.3    0.00    0.01     614         PQCLEAN_FALCON512_CLEAN_FFT [18]
-                0.00    0.01   90270/183400      fpr_sub [20]
-                0.00    0.00   90270/432868      PQCLEAN_FALCON512_CLEAN_fpr_add [16]
-                0.00    0.00  120360/425108      PQCLEAN_FALCON512_CLEAN_fpr_mul [19]
------------------------------------------------
-                0.00    0.00     512/425108      PQCLEAN_FALCON512_CLEAN_poly_div_autoadj_fft [74]
-                0.00    0.00     512/425108      ffSampling_fft_dyntree [27]
-                0.00    0.00    1024/425108      PQCLEAN_FALCON512_CLEAN_poly_add_muladj_fft [72]
-                0.00    0.00    2048/425108      PQCLEAN_FALCON512_CLEAN_poly_muladj_fft [68]
-                0.00    0.00    2755/425108      fpr_sqr [71]
-                0.00    0.00    3462/425108      PQCLEAN_FALCON512_CLEAN_fpr_expm_p63 [69]
-                0.00    0.00    3462/425108      BerExp [53]
-                0.00    0.00    3882/425108      solve_NTRU_intermediate [13]
-                0.00    0.00    4486/425108      PQCLEAN_FALCON512_CLEAN_sampler [45]
-                0.00    0.00    6144/425108      PQCLEAN_FALCON512_CLEAN_poly_mulconst [60]
-                0.00    0.00    6733/425108      fpr_sqr [59]
-                0.00    0.00    8192/425108      PQCLEAN_FALCON512_CLEAN_poly_merge_fft [46]
-                0.00    0.00    8350/425108      PQCLEAN_FALCON512_CLEAN_poly_mul_autoadj_fft [57]
-                0.00    0.00   12796/425108      fpr_sqr [51]
-                0.00    0.00   16384/425108      PQCLEAN_FALCON512_CLEAN_poly_split_fft [40]
-                0.00    0.00   23040/425108      PQCLEAN_FALCON512_CLEAN_poly_LDL_fft [41]
-                0.00    0.00   28280/425108      PQCLEAN_FALCON512_CLEAN_poly_mul_fft [43]
-                0.00    0.00   80430/425108      PQCLEAN_FALCON512_CLEAN_iFFT [22]
-                0.00    0.00   92256/425108      poly_big_to_fp [28]
-                0.00    0.00  120360/425108      PQCLEAN_FALCON512_CLEAN_FFT [18]
-[19]     7.2    0.00    0.01  425108         PQCLEAN_FALCON512_CLEAN_fpr_mul [19]
-                0.01    0.00  425108/926960      FPR [15]
------------------------------------------------
-                0.00    0.00     256/183400      PQCLEAN_FALCON512_CLEAN_poly_add_muladj_fft [72]
-                0.00    0.00     512/183400      PQCLEAN_FALCON512_CLEAN_poly_muladj_fft [68]
-                0.00    0.00    5120/183400      PQCLEAN_FALCON512_CLEAN_poly_sub [55]
-                0.00    0.00    6144/183400      PQCLEAN_FALCON512_CLEAN_poly_merge_fft [46]
-                0.00    0.00    7070/183400      PQCLEAN_FALCON512_CLEAN_poly_mul_fft [43]
-                0.00    0.00    9216/183400      PQCLEAN_FALCON512_CLEAN_poly_LDL_fft [41]
-                0.00    0.00   12288/183400      PQCLEAN_FALCON512_CLEAN_poly_split_fft [40]
-                0.00    0.00   52524/183400      PQCLEAN_FALCON512_CLEAN_iFFT [22]
-                0.00    0.01   90270/183400      PQCLEAN_FALCON512_CLEAN_FFT [18]
-[20]     5.4    0.00    0.01  183400         fpr_sub [20]
-                0.00    0.01  183400/432868      PQCLEAN_FALCON512_CLEAN_fpr_add [16]
------------------------------------------------
-                0.00    0.00    1024/683552      solve_NTRU_binary_depth0 [62]
-                0.00    0.00    3794/683552      modp_R2 [73]
-                0.00    0.00  115110/683552      modp_iNTT2_ext [44]
-                0.00    0.00  200798/683552      modp_NTT2_ext [36]
-                0.01    0.00  362826/683552      zint_mod_small_unsigned [29]
-[21]     5.3    0.01    0.00  683552         modp_add [21]
------------------------------------------------
-                0.00    0.00       1/303         solve_NTRU_binary_depth0 [62]
-                0.00    0.00       2/303         do_sign_dyn [26]
-                0.00    0.00       3/303         solve_NTRU_binary_depth1 [49]
-                0.00    0.00      10/303         PQCLEAN_FALCON512_CLEAN_keygen [11]
-                0.00    0.01     287/303         solve_NTRU_intermediate [13]
-[22]     4.4    0.00    0.01     303         PQCLEAN_FALCON512_CLEAN_iFFT [22]
-                0.00    0.00   52524/432868      PQCLEAN_FALCON512_CLEAN_fpr_add [16]
-                0.00    0.00   52524/183400      fpr_sub [20]
-                0.00    0.00   80430/425108      PQCLEAN_FALCON512_CLEAN_fpr_mul [19]
-                0.00    0.00    4896/21534       fpr_neg [86]
------------------------------------------------
-                0.00    0.01       1/1           run_falcon512_verify [1]
-[23]     4.3    0.00    0.01       1         PQCLEAN_FALCON512_CLEAN_crypto_sign_signature [23]
-                0.00    0.01       1/1           do_sign [24]
------------------------------------------------
-                0.00    0.01       1/1           PQCLEAN_FALCON512_CLEAN_crypto_sign_signature [23]
-[24]     4.3    0.00    0.01       1         do_sign [24]
-                0.00    0.01       1/1           PQCLEAN_FALCON512_CLEAN_sign_dyn [25]
-                0.00    0.00       1/1           PQCLEAN_FALCON512_CLEAN_complete_private [56]
-                0.00    0.00       3/3           PQCLEAN_FALCON512_CLEAN_trim_i8_decode [144]
-                0.00    0.00       3/2004        shake256_inc_absorb [107]
-                0.00    0.00       2/4           PQCLEAN_randombytes [141]
-                0.00    0.00       2/1003        shake256_inc_init [122]
-                0.00    0.00       2/1003        shake256_inc_finalize [121]
-                0.00    0.00       2/1003        shake256_inc_ctx_release [120]
-                0.00    0.00       1/1001        PQCLEAN_FALCON512_CLEAN_hash_to_point_ct [123]
-                0.00    0.00       1/1           PQCLEAN_FALCON512_CLEAN_comp_encode [147]
------------------------------------------------
-                0.00    0.01       1/1           do_sign [24]
-[25]     4.2    0.00    0.01       1         PQCLEAN_FALCON512_CLEAN_sign_dyn [25]
-                0.00    0.01       1/1           do_sign_dyn [26]
-                0.00    0.00       1/1           PQCLEAN_FALCON512_CLEAN_prng_init [150]
------------------------------------------------
-                0.00    0.01       1/1           PQCLEAN_FALCON512_CLEAN_sign_dyn [25]
-[26]     4.2    0.00    0.01       1         do_sign_dyn [26]
-                0.00    0.01       1/1           ffSampling_fft_dyntree [27]
-                0.00    0.00       9/614         PQCLEAN_FALCON512_CLEAN_FFT [18]
-                0.00    0.00       8/8           smallints_to_fpr [64]
-                0.00    0.00       4/4           PQCLEAN_FALCON512_CLEAN_poly_mulselfadj_fft [67]
-                0.00    0.00       2/2           PQCLEAN_FALCON512_CLEAN_poly_muladj_fft [68]
-                0.00    0.00       2/303         PQCLEAN_FALCON512_CLEAN_iFFT [22]
-                0.00    0.00       2/12          PQCLEAN_FALCON512_CLEAN_poly_mulconst [60]
-                0.00    0.00     512/11849       fpr_of [52]
-                0.00    0.00       6/1093        PQCLEAN_FALCON512_CLEAN_poly_mul_fft [43]
-                0.00    0.00       5/803         PQCLEAN_FALCON512_CLEAN_poly_add [47]
-                0.00    0.00    1024/1024        fpr_rint [116]
-                0.00    0.00       4/4           PQCLEAN_FALCON512_CLEAN_poly_neg [140]
-                0.00    0.00       1/1           fpr_neg [151]
-                0.00    0.00       1/1           PQCLEAN_FALCON512_CLEAN_is_short_half [148]
------------------------------------------------
-                                1022             ffSampling_fft_dyntree [27]
-                0.00    0.01       1/1           do_sign_dyn [26]
-[27]     3.8    0.00    0.01       1+1022    ffSampling_fft_dyntree [27]
-                0.00    0.00    2044/2044        PQCLEAN_FALCON512_CLEAN_poly_split_fft [40]
-                0.00    0.00     511/511         PQCLEAN_FALCON512_CLEAN_poly_LDL_fft [41]
-                0.00    0.00    1024/1024        PQCLEAN_FALCON512_CLEAN_sampler [45]
-                0.00    0.00    1022/1022        PQCLEAN_FALCON512_CLEAN_poly_merge_fft [46]
-                0.00    0.00     511/1093        PQCLEAN_FALCON512_CLEAN_poly_mul_fft [43]
-                0.00    0.00     511/803         PQCLEAN_FALCON512_CLEAN_poly_add [47]
-                0.00    0.00     511/513         PQCLEAN_FALCON512_CLEAN_poly_sub [55]
-                0.00    0.00    1024/11849       fpr_of [52]
-                0.00    0.00     512/512         PQCLEAN_FALCON512_CLEAN_fpr_sqrt [75]
-                0.00    0.00     512/425108      PQCLEAN_FALCON512_CLEAN_fpr_mul [19]
-                                1022             ffSampling_fft_dyntree [27]
------------------------------------------------
-                0.00    0.00       4/592         solve_NTRU_binary_depth1 [49]
-                0.00    0.01     588/592         solve_NTRU_intermediate [13]
-[28]     3.7    0.00    0.01     592         poly_big_to_fp [28]
-                0.00    0.00   92256/425108      PQCLEAN_FALCON512_CLEAN_fpr_mul [19]
-                0.00    0.00   46128/432868      PQCLEAN_FALCON512_CLEAN_fpr_add [16]
-                0.00    0.00   46128/52528       fpr_of [42]
------------------------------------------------
-                0.00    0.00   21610/49832       zint_rebuild_CRT [37]
-                0.00    0.00   28222/49832       zint_mod_small_signed [34]
-[29]     2.8    0.00    0.01   49832         zint_mod_small_unsigned [29]
-                0.01    0.00  362826/683552      modp_add [21]
-                0.00    0.00  362826/975905      modp_montymul [77]
------------------------------------------------
-                0.00    0.00       1/1001        PQCLEAN_FALCON512_CLEAN_complete_private [56]
-                0.00    0.00    1000/1001        PQCLEAN_FALCON512_CLEAN_verify_raw [5]
-[30]     2.5    0.00    0.00    1001         mq_poly_montymul_ntt [30]
-                0.00    0.00  512512/8486656     mq_montymul [6]
------------------------------------------------
-                0.00    0.00       1/1001        PQCLEAN_FALCON512_CLEAN_complete_private [56]
-                0.00    0.00    1000/1001        PQCLEAN_FALCON512_CLEAN_to_ntt_monty [9]
-[31]     2.5    0.00    0.00    1001         mq_poly_tomonty [31]
-                0.00    0.00  512512/8486656     mq_montymul [6]
------------------------------------------------
-                0.00    0.00      44/44          make_fg [33]
-[32]     1.8    0.00    0.00      44         make_fg_step [32]
-                0.00    0.00      88/175         zint_rebuild_CRT [37]
-                0.00    0.00    8740/28222       zint_mod_small_signed [34]
-                0.00    0.00     430/1957        modp_NTT2_ext [36]
-                0.00    0.00     674/1764        modp_iNTT2_ext [44]
-                0.00    0.00     446/3794        modp_R2 [73]
-                0.00    0.00     446/993         modp_mkgm2 [76]
-                0.00    0.00   29640/975905      modp_montymul [77]
-                0.00    0.00     446/2804        modp_ninv31 [102]
-                0.00    0.00     207/960         modp_Rx [128]
------------------------------------------------
-                0.00    0.00       1/8           solve_NTRU_deepest [50]
-                0.00    0.00       7/8           solve_NTRU_intermediate [13]
-[33]     1.8    0.00    0.00       8         make_fg [33]
-                0.00    0.00      44/44          make_fg_step [32]
-                0.00    0.00    8192/30014       modp_set [84]
------------------------------------------------
-                0.00    0.00     512/28222       solve_NTRU_binary_depth1 [49]
-                0.00    0.00    6362/28222       solve_NTRU_intermediate [13]
-                0.00    0.00    8740/28222       make_fg_step [32]
-                0.00    0.00   12608/28222       poly_sub_scaled_ntt [35]
-[34]     1.6    0.00    0.00   28222         zint_mod_small_signed [34]
-                0.00    0.00   28222/49832       zint_mod_small_unsigned [29]
-                0.00    0.00   28222/367276      modp_sub [82]
------------------------------------------------
-                0.00    0.00      56/56          solve_NTRU_intermediate [13]
-[35]     1.6    0.00    0.00      56         poly_sub_scaled_ntt [35]
-                0.00    0.00   12608/28222       zint_mod_small_signed [34]
-                0.00    0.00      56/175         zint_rebuild_CRT [37]
-                0.00    0.00     440/1957        modp_NTT2_ext [36]
-                0.00    0.00     220/1764        modp_iNTT2_ext [44]
-                0.00    0.00     220/3794        modp_R2 [73]
-                0.00    0.00     220/993         modp_mkgm2 [76]
-                0.00    0.00   25216/975905      modp_montymul [77]
-                0.00    0.00   12608/30014       modp_set [84]
-                0.00    0.00    3648/3648        zint_sub_scaled [100]
-                0.00    0.00     220/2804        modp_ninv31 [102]
-                0.00    0.00     220/960         modp_Rx [128]
------------------------------------------------
-                0.00    0.00       4/1957        solve_NTRU [12]
-                0.00    0.00       8/1957        solve_NTRU_binary_depth1 [49]
-                0.00    0.00      13/1957        solve_NTRU_binary_depth0 [62]
-                0.00    0.00     430/1957        make_fg_step [32]
-                0.00    0.00     440/1957        poly_sub_scaled_ntt [35]
-                0.00    0.00    1062/1957        solve_NTRU_intermediate [13]
-[36]     1.5    0.00    0.00    1957         modp_NTT2_ext [36]
-                0.00    0.00  200798/683552      modp_add [21]
-                0.00    0.00  200798/975905      modp_montymul [77]
-                0.00    0.00  200798/367276      modp_sub [82]
------------------------------------------------
-                0.00    0.00       1/175         solve_NTRU_deepest [50]
-                0.00    0.00       2/175         solve_NTRU_binary_depth1 [49]
-                0.00    0.00      28/175         solve_NTRU_intermediate [13]
-                0.00    0.00      56/175         poly_sub_scaled_ntt [35]
-                0.00    0.00      88/175         make_fg_step [32]
-[37]     1.2    0.00    0.00     175         zint_rebuild_CRT [37]
-                0.00    0.00   21610/49832       zint_mod_small_unsigned [29]
-                0.00    0.00    1490/3794        modp_R2 [73]
-                0.00    0.00   21610/367276      modp_sub [82]
-                0.00    0.00   21610/975905      modp_montymul [77]
-                0.00    0.00   21610/21610       zint_add_mul_small [85]
-                0.00    0.00   21052/21052       zint_norm_zero [87]
-                0.00    0.00    1490/2804        modp_ninv31 [102]
-                0.00    0.00    1490/1492        zint_mul_small [112]
------------------------------------------------
-                0.00    0.00   11849/64377       fpr_of [52]
-                0.00    0.00   52528/64377       fpr_of [42]
-[38]     1.1    0.00    0.00   64377         PQCLEAN_FALCON512_CLEAN_fpr_scaled [38]
-                0.00    0.00   64377/926960      FPR [15]
------------------------------------------------
-                0.00    0.00    1000/1000        PQCLEAN_FALCON512_CLEAN_verify_raw [5]
-[39]     1.1    0.00    0.00    1000         mq_poly_sub [39]
-                0.00    0.00  512000/7440128     mq_sub [14]
------------------------------------------------
-                0.00    0.00    2044/2044        ffSampling_fft_dyntree [27]
-[40]     1.0    0.00    0.00    2044         PQCLEAN_FALCON512_CLEAN_poly_split_fft [40]
-                0.00    0.00   12288/183400      fpr_sub [20]
-                0.00    0.00   12288/432868      PQCLEAN_FALCON512_CLEAN_fpr_add [16]
-                0.00    0.00   16384/425108      PQCLEAN_FALCON512_CLEAN_fpr_mul [19]
-                0.00    0.00   16384/16384       fpr_half [90]
-                0.00    0.00    4096/21534       fpr_neg [86]
------------------------------------------------
-                0.00    0.00     511/511         ffSampling_fft_dyntree [27]
-[41]     1.0    0.00    0.00     511         PQCLEAN_FALCON512_CLEAN_poly_LDL_fft [41]
-                0.00    0.00   23040/425108      PQCLEAN_FALCON512_CLEAN_fpr_mul [19]
-                0.00    0.00    9216/183400      fpr_sub [20]
-                0.00    0.00    6912/432868      PQCLEAN_FALCON512_CLEAN_fpr_add [16]
-                0.00    0.00    4608/12796       fpr_sqr [51]
-                0.00    0.00    2304/4095        fpr_inv [66]
-                0.00    0.00    6912/21534       fpr_neg [86]
------------------------------------------------
-                0.00    0.00     256/52528       solve_NTRU_binary_depth1 [49]
-                0.00    0.00    1024/52528       solve_NTRU_binary_depth0 [62]
-                0.00    0.00    5120/52528       poly_small_to_fp [63]
-                0.00    0.00   46128/52528       poly_big_to_fp [28]
-[42]     0.9    0.00    0.00   52528         fpr_of [42]
-                0.00    0.00   52528/64377       PQCLEAN_FALCON512_CLEAN_fpr_scaled [38]
------------------------------------------------
-                0.00    0.00       2/1093        solve_NTRU_binary_depth1 [49]
-                0.00    0.00       6/1093        do_sign_dyn [26]
-                0.00    0.00     511/1093        ffSampling_fft_dyntree [27]
-                0.00    0.00     574/1093        solve_NTRU_intermediate [13]
-[43]     0.9    0.00    0.00    1093         PQCLEAN_FALCON512_CLEAN_poly_mul_fft [43]
-                0.00    0.00   28280/425108      PQCLEAN_FALCON512_CLEAN_fpr_mul [19]
-                0.00    0.00    7070/432868      PQCLEAN_FALCON512_CLEAN_fpr_add [16]
-                0.00    0.00    7070/183400      fpr_sub [20]
------------------------------------------------
-                0.00    0.00       6/1764        solve_NTRU_binary_depth1 [49]
-                0.00    0.00       6/1764        solve_NTRU_binary_depth0 [62]
-                0.00    0.00     220/1764        poly_sub_scaled_ntt [35]
-                0.00    0.00     674/1764        make_fg_step [32]
-                0.00    0.00     858/1764        solve_NTRU_intermediate [13]
-[44]     0.9    0.00    0.00    1764         modp_iNTT2_ext [44]
-                0.00    0.00  115110/683552      modp_add [21]
-                0.00    0.00  152442/975905      modp_montymul [77]
-                0.00    0.00  115110/367276      modp_sub [82]
------------------------------------------------
-                0.00    0.00    1024/1024        ffSampling_fft_dyntree [27]
-[45]     0.5    0.00    0.00    1024         PQCLEAN_FALCON512_CLEAN_sampler [45]
-                0.00    0.00    1731/1731        BerExp [53]
-                0.00    0.00    4486/6217        fpr_sub [54]
-                0.00    0.00    4486/11849       fpr_of [52]
-                0.00    0.00    4486/425108      PQCLEAN_FALCON512_CLEAN_fpr_mul [19]
-                0.00    0.00    2755/2755        fpr_sqr [71]
-                0.00    0.00    1731/1731        PQCLEAN_FALCON512_CLEAN_gaussian0_sampler [108]
-                0.00    0.00    1731/5199        prng_get_u8 [96]
-                0.00    0.00    1024/1024        fpr_floor [113]
-                0.00    0.00    1024/1024        fpr_half [114]
------------------------------------------------
-                0.00    0.00    1022/1022        ffSampling_fft_dyntree [27]
-[46]     0.5    0.00    0.00    1022         PQCLEAN_FALCON512_CLEAN_poly_merge_fft [46]
-                0.00    0.00    6144/183400      fpr_sub [20]
-                0.00    0.00    6144/432868      PQCLEAN_FALCON512_CLEAN_fpr_add [16]
-                0.00    0.00    8192/425108      PQCLEAN_FALCON512_CLEAN_fpr_mul [19]
------------------------------------------------
-                0.00    0.00       5/803         do_sign_dyn [26]
-                0.00    0.00     287/803         solve_NTRU_intermediate [13]
-                0.00    0.00     511/803         ffSampling_fft_dyntree [27]
-[47]     0.3    0.00    0.00     803         PQCLEAN_FALCON512_CLEAN_poly_add [47]
-                0.00    0.00   10142/432868      PQCLEAN_FALCON512_CLEAN_fpr_add [16]
------------------------------------------------
-                0.00    0.00       1/13          solve_NTRU_binary_depth1 [49]
-                0.00    0.00       5/13          PQCLEAN_FALCON512_CLEAN_keygen [11]
-                0.00    0.00       7/13          solve_NTRU_intermediate [13]
-[48]     0.3    0.00    0.00      13         PQCLEAN_FALCON512_CLEAN_poly_invnorm2_fft [48]
-                0.00    0.00    4605/432868      PQCLEAN_FALCON512_CLEAN_fpr_add [16]
-                0.00    0.00    6140/12796       fpr_sqr [51]
-                0.00    0.00    1535/4095        fpr_inv [66]
------------------------------------------------
-                0.00    0.00       1/1           solve_NTRU [12]
-[49]     0.2    0.00    0.00       1         solve_NTRU_binary_depth1 [49]
-                0.00    0.00       5/614         PQCLEAN_FALCON512_CLEAN_FFT [18]
-                0.00    0.00       3/303         PQCLEAN_FALCON512_CLEAN_iFFT [22]
-                0.00    0.00       1/1           PQCLEAN_FALCON512_CLEAN_poly_add_muladj_fft [72]
-                0.00    0.00     512/28222       zint_mod_small_signed [34]
-                0.00    0.00       4/592         poly_big_to_fp [28]
-                0.00    0.00       1/13          PQCLEAN_FALCON512_CLEAN_poly_invnorm2_fft [48]
-                0.00    0.00       2/175         zint_rebuild_CRT [37]
-                0.00    0.00       8/1957        modp_NTT2_ext [36]
-                0.00    0.00     256/52528       fpr_of [42]
-                0.00    0.00       6/1764        modp_iNTT2_ext [44]
-                0.00    0.00       2/1093        PQCLEAN_FALCON512_CLEAN_poly_mul_fft [43]
-                0.00    0.00       2/513         PQCLEAN_FALCON512_CLEAN_poly_sub [55]
-                0.00    0.00       1/298         PQCLEAN_FALCON512_CLEAN_poly_mul_autoadj_fft [57]
-                0.00    0.00       4/3794        modp_R2 [73]
-                0.00    0.00       2/993         modp_mkgm2 [76]
-                0.00    0.00    2048/30014       modp_set [84]
-                0.00    0.00    1536/975905      modp_montymul [77]
-                0.00    0.00     768/4254        fpr_rint [97]
-                0.00    0.00     512/6465        fpr_lt [95]
-                0.00    0.00       4/2804        modp_ninv31 [102]
-                0.00    0.00       4/4           modp_poly_rec_res [142]
-                0.00    0.00       3/19          align_fpr [138]
-                0.00    0.00       2/960         modp_Rx [128]
------------------------------------------------
-                0.00    0.00       1/1           solve_NTRU [12]
-[50]     0.2    0.00    0.00       1         solve_NTRU_deepest [50]
-                0.00    0.00       1/8           make_fg [33]
-                0.00    0.00       1/175         zint_rebuild_CRT [37]
-                0.00    0.00       2/1492        zint_mul_small [112]
-                0.00    0.00       1/1           zint_bezout [152]
------------------------------------------------
-                0.00    0.00    2048/12796       PQCLEAN_FALCON512_CLEAN_poly_mulselfadj_fft [67]
-                0.00    0.00    4608/12796       PQCLEAN_FALCON512_CLEAN_poly_LDL_fft [41]
-                0.00    0.00    6140/12796       PQCLEAN_FALCON512_CLEAN_poly_invnorm2_fft [48]
-[51]     0.2    0.00    0.00   12796         fpr_sqr [51]
-                0.00    0.00   12796/425108      PQCLEAN_FALCON512_CLEAN_fpr_mul [19]
------------------------------------------------
-                0.00    0.00     512/11849       do_sign_dyn [26]
-                0.00    0.00    1024/11849       ffSampling_fft_dyntree [27]
-                0.00    0.00    1731/11849       BerExp [53]
-                0.00    0.00    4096/11849       smallints_to_fpr [64]
-                0.00    0.00    4486/11849       PQCLEAN_FALCON512_CLEAN_sampler [45]
-[52]     0.2    0.00    0.00   11849         fpr_of [52]
-                0.00    0.00   11849/64377       PQCLEAN_FALCON512_CLEAN_fpr_scaled [38]
------------------------------------------------
-                0.00    0.00    1731/1731        PQCLEAN_FALCON512_CLEAN_sampler [45]
-[53]     0.2    0.00    0.00    1731         BerExp [53]
-                0.00    0.00    3462/425108      PQCLEAN_FALCON512_CLEAN_fpr_mul [19]
-                0.00    0.00    1731/1731        PQCLEAN_FALCON512_CLEAN_fpr_expm_p63 [69]
-                0.00    0.00    1731/6217        fpr_sub [54]
-                0.00    0.00    1731/11849       fpr_of [52]
-                0.00    0.00    1737/5199        prng_get_u8 [96]
-                0.00    0.00    1731/1731        fpr_trunc [109]
------------------------------------------------
-                0.00    0.00    1731/6217        BerExp [53]
-                0.00    0.00    4486/6217        PQCLEAN_FALCON512_CLEAN_sampler [45]
-[54]     0.2    0.00    0.00    6217         fpr_sub [54]
-                0.00    0.00    6217/432868      PQCLEAN_FALCON512_CLEAN_fpr_add [16]
------------------------------------------------
-                0.00    0.00       2/513         solve_NTRU_binary_depth1 [49]
-                0.00    0.00     511/513         ffSampling_fft_dyntree [27]
-[55]     0.1    0.00    0.00     513         PQCLEAN_FALCON512_CLEAN_poly_sub [55]
-                0.00    0.00    5120/183400      fpr_sub [20]
------------------------------------------------
-                0.00    0.00       1/1           do_sign [24]
-[56]     0.1    0.00    0.00       1         PQCLEAN_FALCON512_CLEAN_complete_private [56]
-                0.00    0.00       3/2005        mq_NTT [7]
-                0.00    0.00     512/1024        mq_div_12289 [61]
-                0.00    0.00       1/1002        mq_iNTT [8]
-                0.00    0.00       1/1001        mq_poly_tomonty [31]
-                0.00    0.00       1/1001        mq_poly_montymul_ntt [30]
-                0.00    0.00    1536/2560        mq_conv_small [104]
------------------------------------------------
-                0.00    0.00       1/298         solve_NTRU_binary_depth1 [49]
-                0.00    0.00      10/298         PQCLEAN_FALCON512_CLEAN_keygen [11]
-                0.00    0.00     287/298         solve_NTRU_intermediate [13]
-[57]     0.1    0.00    0.00     298         PQCLEAN_FALCON512_CLEAN_poly_mul_autoadj_fft [57]
-                0.00    0.00    8350/425108      PQCLEAN_FALCON512_CLEAN_fpr_mul [19]
------------------------------------------------
-                0.00    0.00       1/1           PQCLEAN_FALCON512_CLEAN_keygen [11]
-[58]     0.1    0.00    0.00       1         PQCLEAN_FALCON512_CLEAN_compute_public [58]
-                0.00    0.00     512/1024        mq_div_12289 [61]
-                0.00    0.00       2/2005        mq_NTT [7]
-                0.00    0.00       1/1002        mq_iNTT [8]
-                0.00    0.00    1024/2560        mq_conv_small [104]
------------------------------------------------
-                0.00    0.00    1613/6733        solve_NTRU_intermediate [13]
-                0.00    0.00    5120/6733        PQCLEAN_FALCON512_CLEAN_keygen [11]
-[59]     0.1    0.00    0.00    6733         fpr_sqr [59]
-                0.00    0.00    6733/425108      PQCLEAN_FALCON512_CLEAN_fpr_mul [19]
------------------------------------------------
-                0.00    0.00       2/12          do_sign_dyn [26]
-                0.00    0.00      10/12          PQCLEAN_FALCON512_CLEAN_keygen [11]
-[60]     0.1    0.00    0.00      12         PQCLEAN_FALCON512_CLEAN_poly_mulconst [60]
-                0.00    0.00    6144/425108      PQCLEAN_FALCON512_CLEAN_fpr_mul [19]
------------------------------------------------
-                0.00    0.00     512/1024        PQCLEAN_FALCON512_CLEAN_compute_public [58]
-                0.00    0.00     512/1024        PQCLEAN_FALCON512_CLEAN_complete_private [56]
-[61]     0.1    0.00    0.00    1024         mq_div_12289 [61]
-                0.00    0.00   11264/11264       mq_montysqr [70]
-                0.00    0.00    9216/8486656     mq_montymul [6]
------------------------------------------------
-                0.00    0.00       1/1           solve_NTRU [12]
-[62]     0.1    0.00    0.00       1         solve_NTRU_binary_depth0 [62]
-                0.00    0.00       2/614         PQCLEAN_FALCON512_CLEAN_FFT [18]
-                0.00    0.00    1024/52528       fpr_of [42]
-                0.00    0.00       1/303         PQCLEAN_FALCON512_CLEAN_iFFT [22]
-                0.00    0.00       1/1           PQCLEAN_FALCON512_CLEAN_poly_div_autoadj_fft [74]
-                0.00    0.00      13/1957        modp_NTT2_ext [36]
-                0.00    0.00    1024/683552      modp_add [21]
-                0.00    0.00       6/1764        modp_iNTT2_ext [44]
-                0.00    0.00       4/993         modp_mkgm2 [76]
-                0.00    0.00       1/3794        modp_R2 [73]
-                0.00    0.00    6144/975905      modp_montymul [77]
-                0.00    0.00    5118/30014       modp_set [84]
-                0.00    0.00    2048/2048        modp_norm [105]
-                0.00    0.00    1024/367276      modp_sub [82]
-                0.00    0.00     512/1536        zint_one_to_plain [111]
-                0.00    0.00     512/4254        fpr_rint [97]
-                0.00    0.00       2/19          align_fpr [138]
-                0.00    0.00       1/2804        modp_ninv31 [102]
------------------------------------------------
-                0.00    0.00      10/10          PQCLEAN_FALCON512_CLEAN_keygen [11]
-[63]     0.1    0.00    0.00      10         poly_small_to_fp [63]
-                0.00    0.00    5120/52528       fpr_of [42]
------------------------------------------------
-                0.00    0.00       8/8           do_sign_dyn [26]
-[64]     0.1    0.00    0.00       8         smallints_to_fpr [64]
-                0.00    0.00    4096/11849       fpr_of [52]
------------------------------------------------
-                0.00    0.00    4095/4095        fpr_inv [66]
-[65]     0.1    0.00    0.00    4095         PQCLEAN_FALCON512_CLEAN_fpr_div [65]
-                0.00    0.00    4095/926960      FPR [15]
------------------------------------------------
-                0.00    0.00     256/4095        PQCLEAN_FALCON512_CLEAN_poly_div_autoadj_fft [74]
-                0.00    0.00    1535/4095        PQCLEAN_FALCON512_CLEAN_poly_invnorm2_fft [48]
-                0.00    0.00    2304/4095        PQCLEAN_FALCON512_CLEAN_poly_LDL_fft [41]
-[66]     0.1    0.00    0.00    4095         fpr_inv [66]
-                0.00    0.00    4095/4095        PQCLEAN_FALCON512_CLEAN_fpr_div [65]
------------------------------------------------
-                0.00    0.00       4/4           do_sign_dyn [26]
-[67]     0.1    0.00    0.00       4         PQCLEAN_FALCON512_CLEAN_poly_mulselfadj_fft [67]
-                0.00    0.00    2048/12796       fpr_sqr [51]
-                0.00    0.00    1024/432868      PQCLEAN_FALCON512_CLEAN_fpr_add [16]
------------------------------------------------
-                0.00    0.00       2/2           do_sign_dyn [26]
-[68]     0.1    0.00    0.00       2         PQCLEAN_FALCON512_CLEAN_poly_muladj_fft [68]
-                0.00    0.00    2048/425108      PQCLEAN_FALCON512_CLEAN_fpr_mul [19]
-                0.00    0.00     512/183400      fpr_sub [20]
-                0.00    0.00     512/432868      PQCLEAN_FALCON512_CLEAN_fpr_add [16]
-                0.00    0.00     512/21534       fpr_neg [86]
------------------------------------------------
-                0.00    0.00    1731/1731        BerExp [53]
-[69]     0.1    0.00    0.00    1731         PQCLEAN_FALCON512_CLEAN_fpr_expm_p63 [69]
-                0.00    0.00    3462/425108      PQCLEAN_FALCON512_CLEAN_fpr_mul [19]
-                0.00    0.00    3462/3462        fpr_trunc [101]
------------------------------------------------
-                0.00    0.00   11264/11264       mq_div_12289 [61]
-[70]     0.1    0.00    0.00   11264         mq_montysqr [70]
-                0.00    0.00   11264/8486656     mq_montymul [6]
------------------------------------------------
-                0.00    0.00    2755/2755        PQCLEAN_FALCON512_CLEAN_sampler [45]
-[71]     0.0    0.00    0.00    2755         fpr_sqr [71]
-                0.00    0.00    2755/425108      PQCLEAN_FALCON512_CLEAN_fpr_mul [19]
------------------------------------------------
-                0.00    0.00       1/1           solve_NTRU_binary_depth1 [49]
-[72]     0.0    0.00    0.00       1         PQCLEAN_FALCON512_CLEAN_poly_add_muladj_fft [72]
-                0.00    0.00    1024/425108      PQCLEAN_FALCON512_CLEAN_fpr_mul [19]
-                0.00    0.00     512/432868      PQCLEAN_FALCON512_CLEAN_fpr_add [16]
-                0.00    0.00     256/183400      fpr_sub [20]
-                0.00    0.00     256/21534       fpr_neg [86]
------------------------------------------------
-                0.00    0.00       1/3794        solve_NTRU_binary_depth0 [62]
-                0.00    0.00       4/3794        solve_NTRU_binary_depth1 [49]
-                0.00    0.00     220/3794        poly_sub_scaled_ntt [35]
-                0.00    0.00     446/3794        make_fg_step [32]
-                0.00    0.00     640/3794        solve_NTRU_intermediate [13]
-                0.00    0.00     993/3794        modp_mkgm2 [76]
-                0.00    0.00    1490/3794        zint_rebuild_CRT [37]
-[73]     0.0    0.00    0.00    3794         modp_R2 [73]
-                0.00    0.00    3794/683552      modp_add [21]
-                0.00    0.00   18970/975905      modp_montymul [77]
-                0.00    0.00    3794/6740        modp_R [94]
------------------------------------------------
-                0.00    0.00       1/1           solve_NTRU_binary_depth0 [62]
-[74]     0.0    0.00    0.00       1         PQCLEAN_FALCON512_CLEAN_poly_div_autoadj_fft [74]
-                0.00    0.00     512/425108      PQCLEAN_FALCON512_CLEAN_fpr_mul [19]
-                0.00    0.00     256/4095        fpr_inv [66]
------------------------------------------------
-                0.00    0.00     512/512         ffSampling_fft_dyntree [27]
-[75]     0.0    0.00    0.00     512         PQCLEAN_FALCON512_CLEAN_fpr_sqrt [75]
-                0.00    0.00     512/926960      FPR [15]
------------------------------------------------
-                0.00    0.00       1/993         solve_NTRU [12]
-                0.00    0.00       2/993         solve_NTRU_binary_depth1 [49]
-                0.00    0.00       4/993         solve_NTRU_binary_depth0 [62]
-                0.00    0.00     220/993         poly_sub_scaled_ntt [35]
-                0.00    0.00     320/993         solve_NTRU_intermediate [13]
-                0.00    0.00     446/993         make_fg_step [32]
-[76]     0.0    0.00    0.00     993         modp_mkgm2 [76]
-                0.00    0.00     993/3794        modp_R2 [73]
-                0.00    0.00   75104/975905      modp_montymul [77]
-                0.00    0.00    1986/6740        modp_R [94]
-                0.00    0.00     993/993         modp_div [127]
------------------------------------------------
-                0.00    0.00    1025/975905      solve_NTRU [12]
-                0.00    0.00    1536/975905      solve_NTRU_binary_depth1 [49]
-                0.00    0.00    2048/975905      modp_poly_rec_res [142]
-                0.00    0.00    6144/975905      solve_NTRU_binary_depth0 [62]
-                0.00    0.00    6732/975905      modp_Rx [128]
-                0.00    0.00    8262/975905      solve_NTRU_intermediate [13]
-                0.00    0.00   18970/975905      modp_R2 [73]
-                0.00    0.00   21610/975905      zint_rebuild_CRT [37]
-                0.00    0.00   25216/975905      poly_sub_scaled_ntt [35]
-                0.00    0.00   29640/975905      make_fg_step [32]
-                0.00    0.00   63552/975905      modp_div [127]
-                0.00    0.00   75104/975905      modp_mkgm2 [76]
-                0.00    0.00  152442/975905      modp_iNTT2_ext [44]
-                0.00    0.00  200798/975905      modp_NTT2_ext [36]
-                0.00    0.00  362826/975905      zint_mod_small_unsigned [29]
-[77]     0.0    0.00    0.00  975905         modp_montymul [77]
------------------------------------------------
-                0.00    0.00  758730/758730      shake256_inc_squeeze [79]
-[78]     0.0    0.00    0.00  758730         keccak_inc_squeeze [78]
-                0.00    0.00   13425/13425       KeccakF1600_StatePermute [91]
------------------------------------------------
-                0.00    0.00       1/758730      PQCLEAN_FALCON512_CLEAN_prng_init [150]
-                0.00    0.00   41012/758730      get_rng_u64 [83]
-                0.00    0.00  717717/758730      PQCLEAN_FALCON512_CLEAN_hash_to_point_ct [123]
-[79]     0.0    0.00    0.00  758730         shake256_inc_squeeze [79]
-                0.00    0.00  758730/758730      keccak_inc_squeeze [78]
------------------------------------------------
-                0.00    0.00    3462/436330      fpr_trunc [101]
-                0.00    0.00  432868/436330      PQCLEAN_FALCON512_CLEAN_fpr_add [16]
-[80]     0.0    0.00    0.00  436330         fpr_ursh [80]
------------------------------------------------
-                0.00    0.00  432868/432868      PQCLEAN_FALCON512_CLEAN_fpr_add [16]
-[81]     0.0    0.00    0.00  432868         fpr_ulsh [81]
------------------------------------------------
-                0.00    0.00     512/367276      solve_NTRU [12]
-                0.00    0.00    1024/367276      solve_NTRU_binary_depth0 [62]
-                0.00    0.00   21610/367276      zint_rebuild_CRT [37]
-                0.00    0.00   28222/367276      zint_mod_small_signed [34]
-                0.00    0.00  115110/367276      modp_iNTT2_ext [44]
-                0.00    0.00  200798/367276      modp_NTT2_ext [36]
-[82]     0.0    0.00    0.00  367276         modp_sub [82]
------------------------------------------------
-                0.00    0.00   41012/41012       mkgauss [92]
-[83]     0.0    0.00    0.00   41012         get_rng_u64 [83]
-                0.00    0.00   41012/758730      shake256_inc_squeeze [79]
------------------------------------------------
-                0.00    0.00    2048/30014       solve_NTRU_binary_depth1 [49]
-                0.00    0.00    2048/30014       solve_NTRU [12]
-                0.00    0.00    5118/30014       solve_NTRU_binary_depth0 [62]
-                0.00    0.00    8192/30014       make_fg [33]
-                0.00    0.00   12608/30014       poly_sub_scaled_ntt [35]
-[84]     0.0    0.00    0.00   30014         modp_set [84]
------------------------------------------------
-                0.00    0.00   21610/21610       zint_rebuild_CRT [37]
-[85]     0.0    0.00    0.00   21610         zint_add_mul_small [85]
------------------------------------------------
-                0.00    0.00     256/21534       PQCLEAN_FALCON512_CLEAN_poly_add_muladj_fft [72]
-                0.00    0.00     512/21534       PQCLEAN_FALCON512_CLEAN_poly_muladj_fft [68]
-                0.00    0.00    2048/21534       PQCLEAN_FALCON512_CLEAN_poly_neg [140]
-                0.00    0.00    2814/21534       PQCLEAN_FALCON512_CLEAN_poly_adj_fft [135]
-                0.00    0.00    4096/21534       PQCLEAN_FALCON512_CLEAN_poly_split_fft [40]
-                0.00    0.00    4896/21534       PQCLEAN_FALCON512_CLEAN_iFFT [22]
-                0.00    0.00    6912/21534       PQCLEAN_FALCON512_CLEAN_poly_LDL_fft [41]
-[86]     0.0    0.00    0.00   21534         fpr_neg [86]
------------------------------------------------
-                0.00    0.00   21052/21052       zint_rebuild_CRT [37]
-[87]     0.0    0.00    0.00   21052         zint_norm_zero [87]
-                0.00    0.00   21052/21052       zint_sub [88]
------------------------------------------------
-                0.00    0.00   21052/21052       zint_norm_zero [87]
-[88]     0.0    0.00    0.00   21052         zint_sub [88]
------------------------------------------------
-                0.00    0.00   18104/18104       poly_sub_scaled [130]
-[89]     0.0    0.00    0.00   18104         zint_add_scaled_mul_small [89]
------------------------------------------------
-                0.00    0.00   16384/16384       PQCLEAN_FALCON512_CLEAN_poly_split_fft [40]
-[90]     0.0    0.00    0.00   16384         fpr_half [90]
------------------------------------------------
-                0.00    0.00   13425/13425       keccak_inc_squeeze [78]
-[91]     0.0    0.00    0.00   13425         KeccakF1600_StatePermute [91]
------------------------------------------------
-                0.00    0.00   10253/10253       poly_small_mkgauss [136]
-[92]     0.0    0.00    0.00   10253         mkgauss [92]
-                0.00    0.00   41012/41012       get_rng_u64 [83]
------------------------------------------------
-                0.00    0.00    9018/9018        mq_iNTT [8]
-[93]     0.0    0.00    0.00    9018         mq_rshift1 [93]
------------------------------------------------
-                0.00    0.00     960/6740        modp_Rx [128]
-                0.00    0.00    1986/6740        modp_mkgm2 [76]
-                0.00    0.00    3794/6740        modp_R2 [73]
-[94]     0.0    0.00    0.00    6740         modp_R [94]
------------------------------------------------
-                0.00    0.00       5/6465        PQCLEAN_FALCON512_CLEAN_keygen [11]
-                0.00    0.00     512/6465        solve_NTRU_binary_depth1 [49]
-                0.00    0.00    5948/6465        solve_NTRU_intermediate [13]
-[95]     0.0    0.00    0.00    6465         fpr_lt [95]
------------------------------------------------
-                0.00    0.00    1731/5199        PQCLEAN_FALCON512_CLEAN_gaussian0_sampler [108]
-                0.00    0.00    1731/5199        PQCLEAN_FALCON512_CLEAN_sampler [45]
-                0.00    0.00    1737/5199        BerExp [53]
-[96]     0.0    0.00    0.00    5199         prng_get_u8 [96]
------------------------------------------------
-                0.00    0.00     512/4254        solve_NTRU_binary_depth0 [62]
-                0.00    0.00     768/4254        solve_NTRU_binary_depth1 [49]
-                0.00    0.00    2974/4254        solve_NTRU_intermediate [13]
-[97]     0.0    0.00    0.00    4254         fpr_rint [97]
-                0.00    0.00    4254/4254        fpr_ulsh [98]
-                0.00    0.00    4254/4254        fpr_ursh [99]
------------------------------------------------
-                0.00    0.00    4254/4254        fpr_rint [97]
-[98]     0.0    0.00    0.00    4254         fpr_ulsh [98]
------------------------------------------------
-                0.00    0.00    4254/4254        fpr_rint [97]
-[99]     0.0    0.00    0.00    4254         fpr_ursh [99]
------------------------------------------------
-                0.00    0.00    3648/3648        poly_sub_scaled_ntt [35]
-[100]    0.0    0.00    0.00    3648         zint_sub_scaled [100]
------------------------------------------------
-                0.00    0.00    3462/3462        PQCLEAN_FALCON512_CLEAN_fpr_expm_p63 [69]
-[101]    0.0    0.00    0.00    3462         fpr_trunc [101]
-                0.00    0.00    3462/436330      fpr_ursh [80]
------------------------------------------------
-                0.00    0.00       1/2804        solve_NTRU_binary_depth0 [62]
-                0.00    0.00       1/2804        solve_NTRU [12]
-                0.00    0.00       2/2804        zint_bezout [152]
-                0.00    0.00       4/2804        solve_NTRU_binary_depth1 [49]
-                0.00    0.00     220/2804        poly_sub_scaled_ntt [35]
-                0.00    0.00     446/2804        make_fg_step [32]
-                0.00    0.00     640/2804        solve_NTRU_intermediate [13]
-                0.00    0.00    1490/2804        zint_rebuild_CRT [37]
-[102]    0.0    0.00    0.00    2804         modp_ninv31 [102]
------------------------------------------------
-                0.00    0.00    1024/2755        fpr_rint [116]
-                0.00    0.00    1731/2755        fpr_trunc [109]
-[103]    0.0    0.00    0.00    2755         fpr_ursh [103]
------------------------------------------------
-                0.00    0.00    1024/2560        PQCLEAN_FALCON512_CLEAN_compute_public [58]
-                0.00    0.00    1536/2560        PQCLEAN_FALCON512_CLEAN_complete_private [56]
-[104]    0.0    0.00    0.00    2560         mq_conv_small [104]
------------------------------------------------
-                0.00    0.00    2048/2048        solve_NTRU_binary_depth0 [62]
-[105]    0.0    0.00    0.00    2048         modp_norm [105]
------------------------------------------------
-                0.00    0.00    2004/2004        shake256_inc_absorb [107]
-[106]    0.0    0.00    0.00    2004         keccak_inc_absorb [106]
------------------------------------------------
-                0.00    0.00       1/2004        PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair [10]
-                0.00    0.00       3/2004        do_sign [24]
-                0.00    0.00    2000/2004        do_verify [4]
-[107]    0.0    0.00    0.00    2004         shake256_inc_absorb [107]
-                0.00    0.00    2004/2004        keccak_inc_absorb [106]
------------------------------------------------
-                0.00    0.00    1731/1731        PQCLEAN_FALCON512_CLEAN_sampler [45]
-[108]    0.0    0.00    0.00    1731         PQCLEAN_FALCON512_CLEAN_gaussian0_sampler [108]
-                0.00    0.00    1731/1731        prng_get_u64 [110]
-                0.00    0.00    1731/5199        prng_get_u8 [96]
------------------------------------------------
-                0.00    0.00    1731/1731        BerExp [53]
-[109]    0.0    0.00    0.00    1731         fpr_trunc [109]
-                0.00    0.00    1731/2755        fpr_ursh [103]
------------------------------------------------
-                0.00    0.00    1731/1731        PQCLEAN_FALCON512_CLEAN_gaussian0_sampler [108]
-[110]    0.0    0.00    0.00    1731         prng_get_u64 [110]
-                0.00    0.00      37/38          PQCLEAN_FALCON512_CLEAN_prng_refill [134]
------------------------------------------------
-                0.00    0.00     512/1536        solve_NTRU_binary_depth0 [62]
-                0.00    0.00    1024/1536        poly_big_to_small [146]
-[111]    0.0    0.00    0.00    1536         zint_one_to_plain [111]
------------------------------------------------
-                0.00    0.00       2/1492        solve_NTRU_deepest [50]
-                0.00    0.00    1490/1492        zint_rebuild_CRT [37]
-[112]    0.0    0.00    0.00    1492         zint_mul_small [112]
------------------------------------------------
-                0.00    0.00    1024/1024        PQCLEAN_FALCON512_CLEAN_sampler [45]
-[113]    0.0    0.00    0.00    1024         fpr_floor [113]
-                0.00    0.00    1024/1024        fpr_irsh [115]
------------------------------------------------
-                0.00    0.00    1024/1024        PQCLEAN_FALCON512_CLEAN_sampler [45]
-[114]    0.0    0.00    0.00    1024         fpr_half [114]
------------------------------------------------
-                0.00    0.00    1024/1024        fpr_floor [113]
-[115]    0.0    0.00    0.00    1024         fpr_irsh [115]
------------------------------------------------
-                0.00    0.00    1024/1024        do_sign_dyn [26]
-[116]    0.0    0.00    0.00    1024         fpr_rint [116]
-                0.00    0.00    1024/1024        fpr_ulsh [117]
-                0.00    0.00    1024/2755        fpr_ursh [103]
------------------------------------------------
-                0.00    0.00    1024/1024        fpr_rint [116]
-[117]    0.0    0.00    0.00    1024         fpr_ulsh [117]
------------------------------------------------
-                0.00    0.00    1003/1003        shake256_inc_finalize [121]
-[118]    0.0    0.00    0.00    1003         keccak_inc_finalize [118]
------------------------------------------------
-                0.00    0.00    1003/1003        shake256_inc_init [122]
-[119]    0.0    0.00    0.00    1003         keccak_inc_init [119]
------------------------------------------------
-                0.00    0.00       1/1003        PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair [10]
-                0.00    0.00       2/1003        do_sign [24]
-                0.00    0.00    1000/1003        do_verify [4]
-[120]    0.0    0.00    0.00    1003         shake256_inc_ctx_release [120]
------------------------------------------------
-                0.00    0.00       1/1003        PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair [10]
-                0.00    0.00       2/1003        do_sign [24]
-                0.00    0.00    1000/1003        do_verify [4]
-[121]    0.0    0.00    0.00    1003         shake256_inc_finalize [121]
-                0.00    0.00    1003/1003        keccak_inc_finalize [118]
------------------------------------------------
-                0.00    0.00       1/1003        PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair [10]
-                0.00    0.00       2/1003        do_sign [24]
-                0.00    0.00    1000/1003        do_verify [4]
-[122]    0.0    0.00    0.00    1003         shake256_inc_init [122]
-                0.00    0.00    1003/1003        keccak_inc_init [119]
------------------------------------------------
-                0.00    0.00       1/1001        do_sign [24]
-                0.00    0.00    1000/1001        do_verify [4]
-[123]    0.0    0.00    0.00    1001         PQCLEAN_FALCON512_CLEAN_hash_to_point_ct [123]
-                0.00    0.00  717717/758730      shake256_inc_squeeze [79]
------------------------------------------------
-                0.00    0.00    1000/1000        do_verify [4]
-[124]    0.0    0.00    0.00    1000         PQCLEAN_FALCON512_CLEAN_comp_decode [124]
------------------------------------------------
-                0.00    0.00    1000/1000        PQCLEAN_FALCON512_CLEAN_verify_raw [5]
-[125]    0.0    0.00    0.00    1000         PQCLEAN_FALCON512_CLEAN_is_short [125]
------------------------------------------------
-                0.00    0.00    1000/1000        do_verify [4]
-[126]    0.0    0.00    0.00    1000         PQCLEAN_FALCON512_CLEAN_modq_decode [126]
------------------------------------------------
-                0.00    0.00     993/993         modp_mkgm2 [76]
-[127]    0.0    0.00    0.00     993         modp_div [127]
-                0.00    0.00   63552/975905      modp_montymul [77]
------------------------------------------------
-                0.00    0.00       2/960         solve_NTRU_binary_depth1 [49]
-                0.00    0.00     207/960         make_fg_step [32]
-                0.00    0.00     220/960         poly_sub_scaled_ntt [35]
-                0.00    0.00     531/960         solve_NTRU_intermediate [13]
-[128]    0.0    0.00    0.00     960         modp_Rx [128]
-                0.00    0.00    6732/975905      modp_montymul [77]
-                0.00    0.00     960/6740        modp_R [94]
------------------------------------------------
-                0.00    0.00     880/880         zint_co_reduce_mod [131]
-[129]    0.0    0.00    0.00     880         zint_finish_mod [129]
------------------------------------------------
-                0.00    0.00     518/518         solve_NTRU_intermediate [13]
-[130]    0.0    0.00    0.00     518         poly_sub_scaled [130]
-                0.00    0.00   18104/18104       zint_add_scaled_mul_small [89]
------------------------------------------------
-                0.00    0.00     440/440         zint_bezout [152]
-[131]    0.0    0.00    0.00     440         zint_co_reduce_mod [131]
-                0.00    0.00     880/880         zint_finish_mod [129]
------------------------------------------------
-                0.00    0.00     440/440         zint_co_reduce [133]
-[132]    0.0    0.00    0.00     440         zint_negate [132]
------------------------------------------------
-                0.00    0.00     220/220         zint_bezout [152]
-[133]    0.0    0.00    0.00     220         zint_co_reduce [133]
-                0.00    0.00     440/440         zint_negate [132]
------------------------------------------------
-                0.00    0.00       1/38          PQCLEAN_FALCON512_CLEAN_prng_init [150]
-                0.00    0.00      37/38          prng_get_u64 [110]
-[134]    0.0    0.00    0.00      38         PQCLEAN_FALCON512_CLEAN_prng_refill [134]
------------------------------------------------
-                0.00    0.00      10/24          PQCLEAN_FALCON512_CLEAN_keygen [11]
-                0.00    0.00      14/24          solve_NTRU_intermediate [13]
-[135]    0.0    0.00    0.00      24         PQCLEAN_FALCON512_CLEAN_poly_adj_fft [135]
-                0.00    0.00    2814/21534       fpr_neg [86]
------------------------------------------------
-                0.00    0.00      20/20          PQCLEAN_FALCON512_CLEAN_keygen [11]
-[136]    0.0    0.00    0.00      20         poly_small_mkgauss [136]
-                0.00    0.00   10253/10253       mkgauss [92]
------------------------------------------------
-                0.00    0.00      20/20          PQCLEAN_FALCON512_CLEAN_keygen [11]
-[137]    0.0    0.00    0.00      20         poly_small_sqnorm [137]
------------------------------------------------
-                0.00    0.00       2/19          solve_NTRU_binary_depth0 [62]
-                0.00    0.00       3/19          solve_NTRU_binary_depth1 [49]
-                0.00    0.00      14/19          solve_NTRU_intermediate [13]
-[138]    0.0    0.00    0.00      19         align_fpr [138]
------------------------------------------------
-                0.00    0.00       7/7           solve_NTRU_intermediate [13]
-[139]    0.0    0.00    0.00       7         align_u32 [139]
------------------------------------------------
-                0.00    0.00       4/4           do_sign_dyn [26]
-[140]    0.0    0.00    0.00       4         PQCLEAN_FALCON512_CLEAN_poly_neg [140]
-                0.00    0.00    2048/21534       fpr_neg [86]
------------------------------------------------
-                0.00    0.00       1/4           run_falcon512_verify [1]
-                0.00    0.00       1/4           PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair [10]
-                0.00    0.00       2/4           do_sign [24]
-[141]    0.0    0.00    0.00       4         PQCLEAN_randombytes [141]
-                0.00    0.00       4/4           randombytes_linux_randombytes_getrandom [143]
------------------------------------------------
-                0.00    0.00       4/4           solve_NTRU_binary_depth1 [49]
-[142]    0.0    0.00    0.00       4         modp_poly_rec_res [142]
-                0.00    0.00    2048/975905      modp_montymul [77]
------------------------------------------------
-                0.00    0.00       4/4           PQCLEAN_randombytes [141]
-[143]    0.0    0.00    0.00       4         randombytes_linux_randombytes_getrandom [143]
------------------------------------------------
-                0.00    0.00       3/3           do_sign [24]
-[144]    0.0    0.00    0.00       3         PQCLEAN_FALCON512_CLEAN_trim_i8_decode [144]
------------------------------------------------
-                0.00    0.00       3/3           PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair [10]
-[145]    0.0    0.00    0.00       3         PQCLEAN_FALCON512_CLEAN_trim_i8_encode [145]
------------------------------------------------
-                0.00    0.00       2/2           solve_NTRU [12]
-[146]    0.0    0.00    0.00       2         poly_big_to_small [146]
-                0.00    0.00    1024/1536        zint_one_to_plain [111]
------------------------------------------------
-                0.00    0.00       1/1           do_sign [24]
-[147]    0.0    0.00    0.00       1         PQCLEAN_FALCON512_CLEAN_comp_encode [147]
------------------------------------------------
-                0.00    0.00       1/1           do_sign_dyn [26]
-[148]    0.0    0.00    0.00       1         PQCLEAN_FALCON512_CLEAN_is_short_half [148]
------------------------------------------------
-                0.00    0.00       1/1           PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair [10]
-[149]    0.0    0.00    0.00       1         PQCLEAN_FALCON512_CLEAN_modq_encode [149]
------------------------------------------------
-                0.00    0.00       1/1           PQCLEAN_FALCON512_CLEAN_sign_dyn [25]
-[150]    0.0    0.00    0.00       1         PQCLEAN_FALCON512_CLEAN_prng_init [150]
-                0.00    0.00       1/758730      shake256_inc_squeeze [79]
-                0.00    0.00       1/38          PQCLEAN_FALCON512_CLEAN_prng_refill [134]
------------------------------------------------
-                0.00    0.00       1/1           do_sign_dyn [26]
-[151]    0.0    0.00    0.00       1         fpr_neg [151]
------------------------------------------------
-                0.00    0.00       1/1           solve_NTRU_deepest [50]
-[152]    0.0    0.00    0.00       1         zint_bezout [152]
-                0.00    0.00     440/440         zint_co_reduce_mod [131]
-                0.00    0.00     220/220         zint_co_reduce [133]
-                0.00    0.00       2/2804        modp_ninv31 [102]
+[4]    100.0    0.00    0.17                 main [4]
+                0.00    0.17       1/1           run_falcon512_verify [3]
+-----------------------------------------------
+                0.01    0.00  512000/8448000     mq_poly_tomonty [16]
+                0.01    0.00  512000/8448000     mq_poly_montymul_ntt [15]
+                0.04    0.00 2816000/8448000     mq_iNTT [9]
+                0.06    0.00 4608000/8448000     mq_NTT [7]
+[5]     64.7    0.11    0.00 8448000         mq_montymul [5]
+-----------------------------------------------
+                0.00    0.09    1000/1000        do_verify [2]
+[6]     53.9    0.00    0.09    1000         PQCLEAN_FALCON512_CLEAN_verify_raw [6]
+                0.00    0.04    1000/1000        mq_iNTT [9]
+                0.01    0.04    1000/2000        mq_NTT [7]
+                0.00    0.01    1000/1000        mq_poly_montymul_ntt [15]
+                0.00    0.00    1000/1000        mq_poly_sub [26]
+                0.00    0.00    1000/1000        PQCLEAN_FALCON512_CLEAN_is_short [22]
+-----------------------------------------------
+                0.01    0.04    1000/2000        PQCLEAN_FALCON512_CLEAN_to_ntt_monty [8]
+                0.01    0.04    1000/2000        PQCLEAN_FALCON512_CLEAN_verify_raw [6]
+[7]     49.0    0.01    0.07    2000         mq_NTT [7]
+                0.06    0.00 4608000/8448000     mq_montymul [5]
+                0.01    0.00 4608000/6912000     mq_add [11]
+                0.00    0.00 4608000/7424000     mq_sub [17]
+-----------------------------------------------
+                0.00    0.05    1000/1000        do_verify [2]
+[8]     28.4    0.00    0.05    1000         PQCLEAN_FALCON512_CLEAN_to_ntt_monty [8]
+                0.01    0.04    1000/2000        mq_NTT [7]
+                0.00    0.01    1000/1000        mq_poly_tomonty [16]
+-----------------------------------------------
+                0.00    0.04    1000/1000        PQCLEAN_FALCON512_CLEAN_verify_raw [6]
+[9]     25.5    0.00    0.04    1000         mq_iNTT [9]
+                0.04    0.00 2816000/8448000     mq_montymul [5]
+                0.01    0.00 2304000/6912000     mq_add [11]
+                0.00    0.00 2304000/7424000     mq_sub [17]
+                0.00    0.00    9000/9000        mq_rshift1 [18]
+-----------------------------------------------
+                0.02    0.01    1000/1000        do_verify [2]
+[10]    17.6    0.02    0.01    1000         PQCLEAN_FALCON512_CLEAN_hash_to_point_ct [10]
+                0.00    0.01  717000/717000      shake256_inc_squeeze [13]
+-----------------------------------------------
+                0.01    0.00 2304000/6912000     mq_iNTT [9]
+                0.01    0.00 4608000/6912000     mq_NTT [7]
+[11]    11.8    0.02    0.00 6912000         mq_add [11]
+-----------------------------------------------
+                0.00    0.01  717000/717000      shake256_inc_squeeze [13]
+[12]     5.9    0.00    0.01  717000         keccak_inc_squeeze [12]
+                0.01    0.00   11000/11000       KeccakF1600_StatePermute [14]
+-----------------------------------------------
+                0.00    0.01  717000/717000      PQCLEAN_FALCON512_CLEAN_hash_to_point_ct [10]
+[13]     5.9    0.00    0.01  717000         shake256_inc_squeeze [13]
+                0.00    0.01  717000/717000      keccak_inc_squeeze [12]
+-----------------------------------------------
+                0.01    0.00   11000/11000       keccak_inc_squeeze [12]
+[14]     5.9    0.01    0.00   11000         KeccakF1600_StatePermute [14]
+-----------------------------------------------
+                0.00    0.01    1000/1000        PQCLEAN_FALCON512_CLEAN_verify_raw [6]
+[15]     3.9    0.00    0.01    1000         mq_poly_montymul_ntt [15]
+                0.01    0.00  512000/8448000     mq_montymul [5]
+-----------------------------------------------
+                0.00    0.01    1000/1000        PQCLEAN_FALCON512_CLEAN_to_ntt_monty [8]
+[16]     3.9    0.00    0.01    1000         mq_poly_tomonty [16]
+                0.01    0.00  512000/8448000     mq_montymul [5]
+-----------------------------------------------
+                0.00    0.00  512000/7424000     mq_poly_sub [26]
+                0.00    0.00 2304000/7424000     mq_iNTT [9]
+                0.00    0.00 4608000/7424000     mq_NTT [7]
+[17]     0.0    0.00    0.00 7424000         mq_sub [17]
+-----------------------------------------------
+                0.00    0.00    9000/9000        mq_iNTT [9]
+[18]     0.0    0.00    0.00    9000         mq_rshift1 [18]
+-----------------------------------------------
+                0.00    0.00    2000/2000        shake256_inc_absorb [20]
+[19]     0.0    0.00    0.00    2000         keccak_inc_absorb [19]
+-----------------------------------------------
+                0.00    0.00    2000/2000        do_verify [2]
+[20]     0.0    0.00    0.00    2000         shake256_inc_absorb [20]
+                0.00    0.00    2000/2000        keccak_inc_absorb [19]
+-----------------------------------------------
+                0.00    0.00    1000/1000        do_verify [2]
+[21]     0.0    0.00    0.00    1000         PQCLEAN_FALCON512_CLEAN_comp_decode [21]
+-----------------------------------------------
+                0.00    0.00    1000/1000        PQCLEAN_FALCON512_CLEAN_verify_raw [6]
+[22]     0.0    0.00    0.00    1000         PQCLEAN_FALCON512_CLEAN_is_short [22]
+-----------------------------------------------
+                0.00    0.00    1000/1000        do_verify [2]
+[23]     0.0    0.00    0.00    1000         PQCLEAN_FALCON512_CLEAN_modq_decode [23]
+-----------------------------------------------
+                0.00    0.00    1000/1000        shake256_inc_finalize [28]
+[24]     0.0    0.00    0.00    1000         keccak_inc_finalize [24]
+-----------------------------------------------
+                0.00    0.00    1000/1000        shake256_inc_init [29]
+[25]     0.0    0.00    0.00    1000         keccak_inc_init [25]
+-----------------------------------------------
+                0.00    0.00    1000/1000        PQCLEAN_FALCON512_CLEAN_verify_raw [6]
+[26]     0.0    0.00    0.00    1000         mq_poly_sub [26]
+                0.00    0.00  512000/7424000     mq_sub [17]
+-----------------------------------------------
+                0.00    0.00    1000/1000        do_verify [2]
+[27]     0.0    0.00    0.00    1000         shake256_inc_ctx_release [27]
+-----------------------------------------------
+                0.00    0.00    1000/1000        do_verify [2]
+[28]     0.0    0.00    0.00    1000         shake256_inc_finalize [28]
+                0.00    0.00    1000/1000        keccak_inc_finalize [24]
+-----------------------------------------------
+                0.00    0.00    1000/1000        do_verify [2]
+[29]     0.0    0.00    0.00    1000         shake256_inc_init [29]
+                0.00    0.00    1000/1000        keccak_inc_init [25]
 -----------------------------------------------
 
  This table describes the call tree of the program, and was sorted by
@@ -1288,54 +291,13 @@ notice and this notice are preserved.
 
 Index by function name
 
-  [53] BerExp                 [24] do_sign                 [7] mq_NTT
-  [15] FPR                    [26] do_sign_dyn            [17] mq_add
-  [91] KeccakF1600_StatePermute [4] do_verify            [104] mq_conv_small
-  [18] PQCLEAN_FALCON512_CLEAN_FFT [27] ffSampling_fft_dyntree [61] mq_div_12289
- [124] PQCLEAN_FALCON512_CLEAN_comp_decode [113] fpr_floor [8] mq_iNTT
- [147] PQCLEAN_FALCON512_CLEAN_comp_encode [90] fpr_half   [6] mq_montymul
-  [56] PQCLEAN_FALCON512_CLEAN_complete_private [114] fpr_half [70] mq_montysqr
-  [58] PQCLEAN_FALCON512_CLEAN_compute_public [66] fpr_inv [30] mq_poly_montymul_ntt
-  [10] PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair [115] fpr_irsh [39] mq_poly_sub
-  [23] PQCLEAN_FALCON512_CLEAN_crypto_sign_signature [95] fpr_lt [31] mq_poly_tomonty
-   [3] PQCLEAN_FALCON512_CLEAN_crypto_sign_verify [86] fpr_neg [93] mq_rshift1
-  [16] PQCLEAN_FALCON512_CLEAN_fpr_add [151] fpr_neg      [14] mq_sub
-  [65] PQCLEAN_FALCON512_CLEAN_fpr_div [42] fpr_of        [28] poly_big_to_fp
-  [69] PQCLEAN_FALCON512_CLEAN_fpr_expm_p63 [52] fpr_of  [146] poly_big_to_small
-  [19] PQCLEAN_FALCON512_CLEAN_fpr_mul [97] fpr_rint     [136] poly_small_mkgauss
-  [38] PQCLEAN_FALCON512_CLEAN_fpr_scaled [116] fpr_rint [137] poly_small_sqnorm
-  [75] PQCLEAN_FALCON512_CLEAN_fpr_sqrt [51] fpr_sqr      [63] poly_small_to_fp
- [108] PQCLEAN_FALCON512_CLEAN_gaussian0_sampler [59] fpr_sqr [130] poly_sub_scaled
- [123] PQCLEAN_FALCON512_CLEAN_hash_to_point_ct [71] fpr_sqr [35] poly_sub_scaled_ntt
-  [22] PQCLEAN_FALCON512_CLEAN_iFFT [20] fpr_sub         [110] prng_get_u64
- [125] PQCLEAN_FALCON512_CLEAN_is_short [54] fpr_sub      [96] prng_get_u8
- [148] PQCLEAN_FALCON512_CLEAN_is_short_half [101] fpr_trunc [143] randombytes_linux_randombytes_getrandom
-  [11] PQCLEAN_FALCON512_CLEAN_keygen [109] fpr_trunc      [1] run_falcon512_verify
- [126] PQCLEAN_FALCON512_CLEAN_modq_decode [81] fpr_ulsh [107] shake256_inc_absorb
- [149] PQCLEAN_FALCON512_CLEAN_modq_encode [98] fpr_ulsh [120] shake256_inc_ctx_release
-  [41] PQCLEAN_FALCON512_CLEAN_poly_LDL_fft [117] fpr_ulsh [121] shake256_inc_finalize
-  [47] PQCLEAN_FALCON512_CLEAN_poly_add [80] fpr_ursh    [122] shake256_inc_init
-  [72] PQCLEAN_FALCON512_CLEAN_poly_add_muladj_fft [99] fpr_ursh [79] shake256_inc_squeeze
- [135] PQCLEAN_FALCON512_CLEAN_poly_adj_fft [103] fpr_ursh [64] smallints_to_fpr
-  [74] PQCLEAN_FALCON512_CLEAN_poly_div_autoadj_fft [83] get_rng_u64 [12] solve_NTRU
-  [48] PQCLEAN_FALCON512_CLEAN_poly_invnorm2_fft [106] keccak_inc_absorb [62] solve_NTRU_binary_depth0
-  [46] PQCLEAN_FALCON512_CLEAN_poly_merge_fft [118] keccak_inc_finalize [49] solve_NTRU_binary_depth1
-  [57] PQCLEAN_FALCON512_CLEAN_poly_mul_autoadj_fft [119] keccak_inc_init [50] solve_NTRU_deepest
-  [43] PQCLEAN_FALCON512_CLEAN_poly_mul_fft [78] keccak_inc_squeeze [13] solve_NTRU_intermediate
-  [68] PQCLEAN_FALCON512_CLEAN_poly_muladj_fft [33] make_fg [85] zint_add_mul_small
-  [60] PQCLEAN_FALCON512_CLEAN_poly_mulconst [32] make_fg_step [89] zint_add_scaled_mul_small
-  [67] PQCLEAN_FALCON512_CLEAN_poly_mulselfadj_fft [92] mkgauss [152] zint_bezout
- [140] PQCLEAN_FALCON512_CLEAN_poly_neg [36] modp_NTT2_ext [133] zint_co_reduce
-  [40] PQCLEAN_FALCON512_CLEAN_poly_split_fft [94] modp_R [131] zint_co_reduce_mod
-  [55] PQCLEAN_FALCON512_CLEAN_poly_sub [73] modp_R2     [129] zint_finish_mod
- [150] PQCLEAN_FALCON512_CLEAN_prng_init [128] modp_Rx    [34] zint_mod_small_signed
- [134] PQCLEAN_FALCON512_CLEAN_prng_refill [21] modp_add  [29] zint_mod_small_unsigned
-  [45] PQCLEAN_FALCON512_CLEAN_sampler [127] modp_div    [112] zint_mul_small
-  [25] PQCLEAN_FALCON512_CLEAN_sign_dyn [44] modp_iNTT2_ext [132] zint_negate
-   [9] PQCLEAN_FALCON512_CLEAN_to_ntt_monty [76] modp_mkgm2 [87] zint_norm_zero
- [144] PQCLEAN_FALCON512_CLEAN_trim_i8_decode [77] modp_montymul [111] zint_one_to_plain
- [145] PQCLEAN_FALCON512_CLEAN_trim_i8_encode [102] modp_ninv31 [37] zint_rebuild_CRT
-   [5] PQCLEAN_FALCON512_CLEAN_verify_raw [105] modp_norm [88] zint_sub
- [141] PQCLEAN_randombytes   [142] modp_poly_rec_res     [100] zint_sub_scaled
- [138] align_fpr              [84] modp_set
- [139] align_u32              [82] modp_sub
+  [14] KeccakF1600_StatePermute [24] keccak_inc_finalize  [18] mq_rshift1
+  [21] PQCLEAN_FALCON512_CLEAN_comp_decode [25] keccak_inc_init [17] mq_sub
+   [1] PQCLEAN_FALCON512_CLEAN_crypto_sign_verify [12] keccak_inc_squeeze [3] run_falcon512_verify
+  [10] PQCLEAN_FALCON512_CLEAN_hash_to_point_ct [7] mq_NTT [20] shake256_inc_absorb
+  [22] PQCLEAN_FALCON512_CLEAN_is_short [11] mq_add       [27] shake256_inc_ctx_release
+  [23] PQCLEAN_FALCON512_CLEAN_modq_decode [9] mq_iNTT    [28] shake256_inc_finalize
+   [8] PQCLEAN_FALCON512_CLEAN_to_ntt_monty [5] mq_montymul [29] shake256_inc_init
+   [6] PQCLEAN_FALCON512_CLEAN_verify_raw [15] mq_poly_montymul_ntt [13] shake256_inc_squeeze
+   [2] do_verify              [26] mq_poly_sub
+  [19] keccak_inc_absorb      [16] mq_poly_tomonty

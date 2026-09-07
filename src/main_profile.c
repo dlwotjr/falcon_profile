@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <sys/gmon.h>
 
 #include "falcon-512/clean/api.h"
 #include "falcon-1024/clean/api.h"
@@ -28,8 +29,10 @@ static void run_falcon512_sign(void) {
     uint8_t msg[MLEN];
     size_t  siglen;
 
+    moncontrol(0);
     PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair(pk, sk);
     randombytes(msg, MLEN);
+    moncontrol(1);
     for (int i = 0; i < NTESTS; i++) {
         PQCLEAN_FALCON512_CLEAN_crypto_sign_signature(sig, &siglen, msg, MLEN, sk);
     }
@@ -42,9 +45,11 @@ static void run_falcon512_verify(void) {
     uint8_t msg[MLEN];
     size_t  siglen;
 
+    moncontrol(0);
     PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair(pk, sk);
     randombytes(msg, MLEN);
     PQCLEAN_FALCON512_CLEAN_crypto_sign_signature(sig, &siglen, msg, MLEN, sk);
+    moncontrol(1);
     for (int i = 0; i < NTESTS; i++) {
         PQCLEAN_FALCON512_CLEAN_crypto_sign_verify(sig, siglen, msg, MLEN, pk);
     }
@@ -67,8 +72,10 @@ static void run_falcon1024_sign(void) {
     uint8_t msg[MLEN];
     size_t  siglen;
 
+    moncontrol(0);
     PQCLEAN_FALCON1024_CLEAN_crypto_sign_keypair(pk, sk);
     randombytes(msg, MLEN);
+    moncontrol(1);
     for (int i = 0; i < NTESTS; i++) {
         PQCLEAN_FALCON1024_CLEAN_crypto_sign_signature(sig, &siglen, msg, MLEN, sk);
     }
@@ -81,9 +88,11 @@ static void run_falcon1024_verify(void) {
     uint8_t msg[MLEN];
     size_t  siglen;
 
+    moncontrol(0);
     PQCLEAN_FALCON1024_CLEAN_crypto_sign_keypair(pk, sk);
     randombytes(msg, MLEN);
     PQCLEAN_FALCON1024_CLEAN_crypto_sign_signature(sig, &siglen, msg, MLEN, sk);
+    moncontrol(1);
     for (int i = 0; i < NTESTS; i++) {
         PQCLEAN_FALCON1024_CLEAN_crypto_sign_verify(sig, siglen, msg, MLEN, pk);
     }
