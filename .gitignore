@@ -1,8 +1,30 @@
-venv/
-tex/*.aux
-tex/*.log
-tex/*.out
-tex/*.toc
+# Compiled binaries and objects
+/falcon_test
+/falcon_profile
+/falcon_profile_O0
+/falcon_profile_O3
+*.o
+*.a
+
+# Profiling scratch files
+/gmon.out
+/gmon_*.out
+/analysis.txt
+/analysis_*.txt
+/output.dot
+/output_*.dot
+/output_*.png
 *.dot
-gmon.out
+
+# Generated local environments and caches
+/venv/
 __pycache__/
+
+# LaTeX intermediate files
+/tex/*.aux
+/tex/*.log
+/tex/*.out
+/tex/*.toc
+
+# Local agent settings
+.claude/

@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""Read gprof flat profiles and write result.md comparing O0 vs O3.
-Run from the falcon_profiling repo root:
-    python3 scripts/gen_result.py
-"""
+"""Read gprof flat profiles and write an O0/O3 inlining comparison report."""
 
 import re
 import os
@@ -25,17 +22,14 @@ TOP_N = 10
 def parse_flat_profile(path):
     """Return (total_seconds, [(pct, cum_sec, self_sec, calls, name), ...])."""
     entries = []
-    total = 0.0
     in_table = False
     with open(path) as f:
         for line in f:
-            # Header line of data table
             if re.match(r"\s+%\s+cumulative", line):
                 in_table = True
                 continue
             if not in_table:
                 continue
-            # Blank line ends the table
             if line.strip() == "":
                 break
             m = re.match(
@@ -49,14 +43,30 @@ def parse_flat_profile(path):
                 calls = float(m.group(4))
                 name = m.group(5).strip()
                 entries.append((pct, cum, slf, calls, name))
-                if not total and cum > 0:
-                    pass  # keep going
-    # total = last cumulative value
     if entries:
-        total = entries[-1][1] if len(entries) > 1 else entries[0][1]
-        # Actually take the max cumulative seen
         total = max(e[1] for e in entries)
+    else:
+        total = 0.0
     return total, entries[:TOP_N]
+
+
+def parse_flat_profile_all(path):
+    """Return set of function names visible in the flat profile."""
+    funcs = set()
+    in_table = False
+    with open(path) as f:
+        for line in f:
+            if re.match(r"\s+%\s+cumulative", line):
+                in_table = True
+                continue
+            if not in_table:
+                continue
+            if line.strip() == "":
+                continue
+            parts = line.strip().split()
+            if len(parts) >= 2 and re.match(r'^[\d.]', parts[0]):
+                funcs.add(parts[-1])
+    return funcs
 
 
 def fmt_calls(n):
@@ -69,15 +79,10 @@ def fmt_calls(n):
     return str(int(n))
 
 
-def speedup_bar(ratio, width=20):
-    filled = min(int(ratio / 5 * width), width)
-    return "█" * filled + "░" * (width - filled)
-
-
 lines = []
-lines.append("# Falcon Profiling Results: O0 vs O3")
+lines.append("# Falcon Profiling Results: O0 vs O3 (Inlining Enabled)")
 lines.append("")
-lines.append("> 1000 iterations each | `-pg` instrumentation | Falcon-512 and Falcon-1024")
+lines.append("> 1000 iterations each | `-pg` only (inlining enabled) | Falcon-512 and Falcon-1024")
 lines.append("")
 
 # Summary speedup table
@@ -100,20 +105,49 @@ for op in OPERATIONS:
 
 lines.append("")
 
-# Per-operation detail
+# Inlined functions summary table
+lines.append("## Inlined Functions Summary (present in O0, absent in O3)")
+lines.append("")
+lines.append("| Operation | O0 visible | O3 visible | Inlined by O3 |")
+lines.append("|-----------|----------:|----------:|--------------:|")
+
+all_inlined = {}
 for op in OPERATIONS:
     p0 = os.path.join(RESULTS_DIR, f"analysis_{op}_O0.txt")
     p3 = os.path.join(RESULTS_DIR, f"analysis_{op}_O3.txt")
     if not os.path.exists(p0) or not os.path.exists(p3):
         continue
+    f0 = parse_flat_profile_all(p0)
+    f3 = parse_flat_profile_all(p3)
+    inlined = f0 - f3
+    all_inlined[op] = inlined
+    lines.append(f"| `{op}` | {len(f0)} | {len(f3)} | **{len(inlined)}** |")
+
+lines.append("")
+
+# Functions inlined in all variants
+if all_inlined:
+    common = set.intersection(*all_inlined.values())
+    lines.append(f"**Functions inlined across all 6 variants ({len(common)}):** "
+                 + ", ".join(f"`{f}`" for f in sorted(common)))
+    lines.append("")
+
+# Per-operation detail
+for op in OPERATIONS:
+    p0 = f"analysis_{op}_O0.txt"
+    p3 = f"analysis_{op}_O3.txt"
+    if not os.path.exists(p0) or not os.path.exists(p3):
+        continue
 
     t0, top0 = parse_flat_profile(p0)
     t3, top3 = parse_flat_profile(p3)
+    inlined = sorted(f for f in all_inlined.get(op, set())
+                     if not f.startswith('['))  # exclude anonymous [N] nodes
 
-    lines.append(f"---")
-    lines.append(f"")
+    lines.append("---")
+    lines.append("")
     lines.append(f"## {op.replace('_', ' ').upper()}")
-    lines.append(f"")
+    lines.append("")
     lines.append(f"Total: **{t0:.2f}s** (O0) → **{t3:.2f}s** (O3)  "
                  f"— **{speedups.get(op, 0):.2f}× faster**")
     lines.append("")
@@ -133,6 +167,13 @@ for op in OPERATIONS:
     for pct, cum, slf, calls, name in top3:
         lines.append(f"| {pct:.2f}% | {slf:.3f} | {fmt_calls(calls)} | `{name}` |")
 
+    if inlined:
+        lines.append("")
+        lines.append("### Inlined by O3 (named functions only)")
+        lines.append("")
+        for f in inlined:
+            lines.append(f"- `{f}`")
+
     lines.append("")
 
 # Analysis section
@@ -145,18 +186,18 @@ lines.append("")
 lines.append("| Flag | Effect on Falcon |")
 lines.append("|------|-----------------|")
 lines.append("| `-O0` | No optimization. Every `fpr_add`, `FPR()`, `modp_montymul` call is a real function call. Accurate per-function attribution. |")
-lines.append("| `-O3` | Aggressive optimization. Loop unrolling, vectorization, CSE, and inlining can move work into callers. |")
-lines.append("| `-pg` | Inserts `mcount` hooks at every function entry for call counting and adds timer sampling for time attribution. |")
+lines.append("| `-O3` | Aggressive inlining enabled. Small leaf functions (`fpr_*`, `modp_*`, `mq_*`, `zint_*`) are inlined into callers and disappear from the profile. |")
+lines.append("| `-pg` | Inserts `mcount` hooks at every function entry for call counting and adds timer sampling for time attribution. Inlined functions no longer have entry hooks and are invisible. |")
 lines.append("")
 lines.append("### Key observations")
 lines.append("")
-lines.append("- **keygen** is the heaviest operation — dominated by `fpr_add` / `modp_montymul` (lattice basis generation via NTT+FFT).")
-lines.append("- **sign** is ~3× faster than keygen but still FFT-heavy (`fpr_add` ~48%). Rejection sampling (`prng_refill`, `mkgauss`) visible.")
-lines.append("- **verify** is 70–300× faster than keygen. Uses integer NTT only (`mq_montymul`, `mq_NTT`) — no floating-point FFT.")
-lines.append("- **Falcon-1024 costs ~2–3× more** than Falcon-512 in all operations (N doubles, FFT is O(N log N)).")
-lines.append("- **O3 speedup** is largest for keygen/sign (arithmetic-heavy), smaller for verify (already fast, memory-bound).")
+lines.append("- **At O3, the compiler inlines 20–116 functions per operation.** The profile loses leaf-function detail but better reflects optimized execution.")
+lines.append("- **keygen** loses nearly half its visible functions (204→93 for Falcon-512). All `fpr_*`, `modp_*`, `zint_*` helpers vanish — inlined into `poly_*` / `solve_NTRU*` callers.")
+lines.append("- **sign** loses `do_sign_dyn` and `ffSampling_fft_dyntree` — the core recursive FFT sampler is fully absorbed. `BerExp` and `smallints_to_fpr` also disappear.")
+lines.append("- **verify** is the lightest operation; even so, all `mq_add/sub/montymul/rshift1` helpers are inlined into `mq_NTT` / `mq_iNTT`.")
+lines.append("- **Universally inlined** (all 6 variants): `keccak_inc_finalize`, `keccak_inc_init`, `keccak_inc_squeeze`, `mq_add`, `mq_montymul`, `mq_rshift1`, `mq_sub`.")
 
-out_path = os.path.join(RESULTS_DIR, "result.md")
+out_path = os.path.join(RESULTS_DIR, "inlining_report.md")
 with open(out_path, "w") as f:
     f.write("\n".join(lines) + "\n")
 

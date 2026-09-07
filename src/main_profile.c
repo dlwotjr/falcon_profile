@@ -9,6 +9,9 @@
 #include "falcon-1024/clean/api.h"
 #include "common/randombytes.h"
 
+/* glibc exports moncontrol() but does not declare it in <sys/gmon.h>. */
+extern void moncontrol(int mode);
+
 #define NTESTS 1000
 #define MLEN   32
 

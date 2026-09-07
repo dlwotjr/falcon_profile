@@ -1,202 +1,138 @@
-# Falcon Profiling
+# Falcon Software and Profiling
 
-Function-level profiling of the **Falcon** post-quantum signature scheme
-(Falcon-512 and Falcon-1024) using `gprof`.
-Compares **-O0** and **-O3** build performance across 1000 iterations of
-KeyGen, Sign, and Verify.
+A self-contained implementation and function-level performance study of the
+**Falcon-512** and **Falcon-1024** post-quantum signature schemes. The project
+builds the PQClean-derived C implementation, checks its signing flow, and uses
+`gprof` to compare `-O0` and `-O3` behavior across key generation, signing, and
+verification.
 
-## Repository Layout
+The source code and profiling artifacts were previously maintained in the
+separate `falcon_swcode` and `falcon_profile` repositories. Their Git histories
+are preserved in this repository.
 
-```
-falcon_profiling/
-├── README.md
-├── .gitignore
-│
+## Highlights
+
+- One-command build and functional smoke test
+- Six profiling workloads: KeyGen, Sign, and Verify for Falcon-512/1024
+- Direct `-O0` versus `-O3` comparison over 1,000 iterations
+- Raw `gprof` output, call graphs, a Markdown analysis, and a PDF report
+- Setup work excluded from Sign and Verify measurements with `moncontrol`
+
+## Repository layout
+
+```text
+.
+├── falcon-512/clean/        # Falcon-512 implementation
+├── falcon-1024/clean/       # Falcon-1024 implementation
+├── common/                  # Shared hashing and randomness utilities
 ├── src/
-│   └── main_profile.c        # Profiling harness — dispatches to one
-│                             #   of 6 operations via argv[1]
-│
-├── scripts/
-│   ├── run_profile.sh        # Full pipeline: build → profile → generate
-│   ├── gen_result.py         # Reads analysis files → results/result.md
-│   └── gen_tex.py            # Reads analysis files → tex/falcon_profiling.tex
-│
-├── results/
-│   ├── analysis_<variant>_<op>_<OPT>.txt   # raw gprof output (12 files)
-│   └── result.md             # O0 vs O3 comparison summary (Markdown)
-│
-├── graphs/
-│   └── output_<variant>_<op>_<OPT>.png     # call graph images (12 files)
-│
-└── tex/
-    ├── Makefile              # compile .tex → .pdf
-    ├── falcon_profiling.tex  # LaTeX report (auto-generated)
-    └── falcon_profiling.pdf  # compiled PDF (23 pages)
+│   ├── main.c               # Functional smoke test
+│   └── main_profile.c       # Profiling workload dispatcher
+├── test/                    # PQClean test programs
+├── scripts/                 # Profiling and report-generation tools
+├── results/                 # Raw profiles and Markdown reports
+├── graphs/                  # Generated call graphs
+├── tex/                     # LaTeX source and compiled report
+└── Makefile
 ```
 
-## Dependencies
+## Requirements
 
-| Tool | Purpose | Install |
-|------|---------|---------|
-| `gcc` | C compiler | `sudo apt install gcc` |
-| `gprof` | profiler | included in `binutils` |
-| `graphviz` | call graph PNG | `sudo apt install graphviz` |
-| `python3` | script runner | `sudo apt install python3` |
-| `gprof2dot` | dot file generator | installed automatically into `venv/` |
-| `pdflatex` | PDF compilation | `sudo apt install texlive-full` |
+The basic build requires GCC, GNU Make, `gprof` (binutils), and Python 3.
+Generating call graphs additionally requires Graphviz; the pipeline creates a
+local virtual environment for `gprof2dot`. Building the PDF requires a LaTeX
+installation with `pdflatex`.
 
-## Quick Start
+On Ubuntu/Debian:
 
-### 1. Prerequisites — build the Falcon source
-
-This repo expects the PQClean Falcon source at `../swcode/` (sibling directory).
-
-```
-workspace/
-├── swcode/          # Falcon source (PQClean)
-└── falcon_profiling/  # this repo
+```bash
+sudo apt install build-essential binutils graphviz python3-venv
 ```
 
-### 2. Run everything at once
+## Build and test
 
-From the `falcon_profiling/` root:
+```bash
+make
+./falcon_test
+```
+
+The smoke test generates a Falcon-512 key pair, signs a message, and verifies
+the signature.
+
+## Run the profiling pipeline
 
 ```bash
 bash scripts/run_profile.sh
 ```
 
-This will:
-1. Build `falcon_profile_O0` and `falcon_profile_O3` in `../swcode/` if needed
-2. Run all 6 operations × 2 builds = 12 gprof runs → `results/analysis_*.txt`
-3. Generate `results/result.md`
-4. Generate `graphs/output_*.png` call graph images (needs graphviz)
-5. Generate `tex/falcon_profiling.tex`
+The pipeline performs the following steps:
 
-### 3. Compile the PDF
+1. Builds `falcon_profile_O0` with `-O0 -pg` and `falcon_profile_O3` with
+   `-O3 -pg`.
+2. Runs KeyGen, Sign, and Verify for Falcon-512 and Falcon-1024, with 1,000
+   iterations per workload.
+3. Writes raw profiles to `results/analysis_*.txt`.
+4. Regenerates `results/result.md`, call-graph PNGs, and the LaTeX report.
 
-```bash
-make -C tex
-```
-
-Output: `tex/falcon_profiling.pdf`
-
----
-
-## Step-by-step (Manual)
-
-### Build the profiling binaries
+To build only the profiling executables or run one workload:
 
 ```bash
-# from ../swcode/
 make falcon_profile_O0 falcon_profile_O3
-```
-
-Compiler flags:
-| Binary | Flags |
-|--------|-------|
-| `falcon_profile_O0` | `-O0 -fno-inline -pg` |
-| `falcon_profile_O3` | `-O3 -fno-inline -pg` |
-
-`-pg` inserts gprof instrumentation hooks.
-`-fno-inline` keeps functions visible even at `-O3`.
-
-### Run a single operation
-
-```bash
-# from ../swcode/
 ./falcon_profile_O3 falcon512_sign
-gprof ./falcon_profile_O3 gmon.out > analysis.txt
 ```
 
-Available operations:
-- `falcon512_keygen` / `falcon512_sign` / `falcon512_verify`
-- `falcon1024_keygen` / `falcon1024_sign` / `falcon1024_verify`
+Accepted workload names are:
 
-### Regenerate Markdown summary
+```text
+falcon512_keygen   falcon512_sign   falcon512_verify
+falcon1024_keygen  falcon1024_sign  falcon1024_verify
+```
+
+## Results
+
+Measured cumulative runtime for 1,000 operations:
+
+| Workload | O0 (s) | O3 (s) | Speedup |
+|---|---:|---:|---:|
+| Falcon-512 KeyGen | 52.37 | 12.37 | 4.23× |
+| Falcon-512 Sign | 16.78 | 3.24 | 5.18× |
+| Falcon-512 Verify | 0.17 | 0.03 | 5.67× |
+| Falcon-1024 KeyGen | 154.45 | 34.26 | 4.51× |
+| Falcon-1024 Sign | 36.09 | 7.57 | 4.77× |
+| Falcon-1024 Verify | 0.35 | 0.15 | 2.33× |
+
+Key observations:
+
+- Key generation is the most expensive workload and combines NTT and FFT
+  arithmetic.
+- Signing is dominated by floating-point FFT operations used by the lattice
+  sampler.
+- Verification is substantially faster and primarily uses integer NTT and
+  SHAKE-256 operations.
+- Compiler inlining at `-O3` improves realistic performance but folds some
+  leaf functions into their callers, reducing per-function visibility in
+  `gprof`.
+
+See the [detailed profiling report](results/result.md),
+[function classification](results/function_classification.md), and
+[inlining analysis](results/inlining_report.md). The generated PDF is available
+at [`tex/falcon_profiling.pdf`](tex/falcon_profiling.pdf).
+
+Profiling measurements depend on the CPU, compiler, system load, and sampling
+resolution. The checked-in results should therefore be treated as one measured
+environment, not universal Falcon performance figures.
+
+## Regenerate individual reports
 
 ```bash
-# from falcon_profiling/
 python3 scripts/gen_result.py
-# writes: results/result.md
-```
-
-### Regenerate call graph PNGs
-
-```bash
-# from falcon_profiling/
-python3 -m venv venv && venv/bin/pip install -q gprof2dot
-for f in results/analysis_*.txt; do
-    op=$(basename "$f" .txt)
-    venv/bin/gprof2dot -f prof "$f" | dot -Tpng -o "graphs/output_${op}.png"
-done
-```
-
-### Regenerate LaTeX report
-
-```bash
-# from falcon_profiling/
+python3 scripts/gen_inlining_report.py
 python3 scripts/gen_tex.py
-# writes: tex/falcon_profiling.tex
 make -C tex
-# writes: tex/falcon_profiling.pdf
 ```
 
----
+## License and provenance
 
-## Profiling Results Summary
-
-### Total runtime (1000 iterations)
-
-| Operation | O0 (s) | O3 (s) | Speedup |
-|-----------|-------:|-------:|--------:|
-| falcon512 keygen  | 51.95 | 11.74 | **4.43×** |
-| falcon512 sign    | 15.93 |  3.24 | **4.92×** |
-| falcon512 verify  |  0.19 |  0.05 | **3.80×** |
-| falcon1024 keygen | 143.26 | 34.31 | **4.18×** |
-| falcon1024 sign   |  34.23 |  6.81 | **5.03×** |
-| falcon1024 verify |   0.59 |  0.08 | **7.37×** |
-
-### Function category breakdown (O3)
-
-| Operation | Hash/PRNG | Integer NTT | FP/FFT |
-|-----------|----------:|------------:|-------:|
-| keygen    | ~4%       | ~35%        | ~55%   |
-| sign      | ~2%       | ~2%         | ~95%   |
-| verify    | ~35%      | ~60%        | ~5%    |
-
-**Key observations:**
-- **Sign** is almost entirely floating-point FFT (`fpr_add` ~49%, `fpr_mul` ~16%) driven by the `ffSampling_fft_dyntree` recursive lattice sampler.
-- **Verify** uses no floating-point FFT at all — only integer NTT (`mq_montymul`, `mq_NTT`) and SHAKE-256 hashing, making it 70–300× faster than keygen.
-- **Falcon-1024 costs ~2–3× more** than Falcon-512 (FFT is O(N log N), N doubles).
-- Under **O3**, the `FPR` constructor overhead drops from ~15% → ~4% and `mq_montymul` vectorises well, giving 7× speedup on verify.
-
----
-
-## Call Graph Trees
-
-PNG call graphs are in `graphs/`. Each node shows `% total time` and self-seconds.
-Hot nodes are red/orange.
-
-| Operation | O0 | O3 |
-|-----------|----|----|
-| falcon512 keygen  | [O0](graphs/output_falcon512_keygen_O0.png)  | [O3](graphs/output_falcon512_keygen_O3.png)  |
-| falcon512 sign    | [O0](graphs/output_falcon512_sign_O0.png)    | [O3](graphs/output_falcon512_sign_O3.png)    |
-| falcon512 verify  | [O0](graphs/output_falcon512_verify_O0.png)  | [O3](graphs/output_falcon512_verify_O3.png)  |
-| falcon1024 keygen | [O0](graphs/output_falcon1024_keygen_O0.png) | [O3](graphs/output_falcon1024_keygen_O3.png) |
-| falcon1024 sign   | [O0](graphs/output_falcon1024_sign_O0.png)   | [O3](graphs/output_falcon1024_sign_O3.png)   |
-| falcon1024 verify | [O0](graphs/output_falcon1024_verify_O0.png) | [O3](graphs/output_falcon1024_verify_O3.png) |
-
----
-
-## LaTeX Report
-
-`tex/falcon_profiling.pdf` is a 23-page report containing:
-- Runtime summary table (O0 vs O3)
-- Category weight tables (Hash / Integer / FP) per operation
-- Per-function detail tables for all 12 operation × build combinations
-- Key findings and analysis
-
-Regenerate after new profiling runs:
-```bash
-python3 scripts/gen_tex.py && make -C tex
-```
+The Falcon implementations are derived from PQClean's clean implementations.
+Their license notices are retained in `falcon-512/clean/LICENSE` and
+`falcon-1024/clean/LICENSE`.

@@ -1,6 +1,6 @@
 # Falcon Profiling Results: O0 vs O3
 
-> 1000 iterations each | `-fno-inline -pg` | Falcon-512 and Falcon-1024
+> 1000 iterations each | `-pg` instrumentation | Falcon-512 and Falcon-1024
 
 ## Total Runtime Summary (cumulative seconds, 1000 ops)
 
@@ -238,8 +238,7 @@ Total: **0.35s** (O0) → **0.15s** (O3)  — **2.33× faster**
 | Flag | Effect on Falcon |
 |------|-----------------|
 | `-O0` | No optimization. Every `fpr_add`, `FPR()`, `modp_montymul` call is a real function call. Accurate per-function attribution. |
-| `-O3` | Aggressive optimization. Loop unrolling, vectorization, CSE. Hot leaf functions may be partially inlined even with `-fno-inline` (macros/static inlines). |
-| `-fno-inline` | Prevents function inlining so gprof can still count calls. Without this, small functions vanish from the profile at `-O3`. |
+| `-O3` | Aggressive optimization. Loop unrolling, vectorization, CSE, and inlining can move work into callers. |
 | `-pg` | Inserts `mcount` hooks at every function entry for call counting and adds timer sampling for time attribution. |
 
 ### Key observations

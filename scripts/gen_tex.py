@@ -243,7 +243,7 @@ def build_tex(data):
         r"and \textbf{Falcon-1024} (NIST Level~5).",
         r"Each operation was executed $\mathbf{1000}$ times and profiled with",
         r"\texttt{gprof} under two compiler settings:",
-        r"\texttt{-O0 -fno-inline -pg} and \texttt{-O3 -fno-inline -pg}.",
+        r"\texttt{-O0 -pg} and \texttt{-O3 -pg}.",
         r"",
         r"Functions are grouped into three categories:",
         r"\begin{itemize}",
