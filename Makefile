@@ -35,8 +35,8 @@ TEST_CFLAGS  = $(CFLAGS) -O2
 PROF_SRCS    = main_profile.c $(FALCON512_SRC) $(FALCON1024_SRC) $(COMMON_SRC)
 PROF_O0      = falcon_profile_O0
 PROF_O3      = falcon_profile_O3
-PROF_O0_FLAGS = $(CFLAGS) -O0 -fno-inline -pg
-PROF_O3_FLAGS = $(CFLAGS) -O3 -fno-inline -pg
+PROF_O0_FLAGS = $(CFLAGS) -O0 -pg
+PROF_O3_FLAGS = $(CFLAGS) -O3 -pg
 
 OPERATIONS = falcon512_keygen falcon512_sign falcon512_verify \
              falcon1024_keygen falcon1024_sign falcon1024_verify
